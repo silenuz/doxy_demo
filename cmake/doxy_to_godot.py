@@ -23,10 +23,11 @@ bound_methods_set = set()
 # track methods that are getters and setters as they should be part of the members output
 # and not the methods output
 property_methods_set = set()
-#track property definitions
+# track property definitions
 bound_properties = dict()
 
-def catalog_bindings(doxygen_data_node: et.Element, class_name: str)->bool:
+
+def catalog_bindings(doxygen_data_node: et.Element, class_name: str) -> bool:
     """
     Starts the process of mapping the bindings from the class implementation file that implements
     the _bind_methods function for the class.
@@ -36,14 +37,14 @@ def catalog_bindings(doxygen_data_node: et.Element, class_name: str)->bool:
     :param class_name: the name of the class being parsed
     :return: Success or failure
     """
-    #clear_tracked_bindings()
+    # clear_tracked_bindings()
     code_file_name = get_implementation_file_name(doxygen_data_node)
     if code_file_name is None:
         print("Unable to determine code implementation file for " + class_name)
         return False
     else:
         project_src = src_folder
-        code_file = next(project_src.rglob(code_file_name),None)
+        code_file = next(project_src.rglob(code_file_name), None)
         if code_file:
             load_godot_bindings(code_file, class_name)
             return True
@@ -51,10 +52,12 @@ def catalog_bindings(doxygen_data_node: et.Element, class_name: str)->bool:
             print("File not found " + code_file_name)
             return False
 
+
 def clear_tracked_bindings():
     bound_methods_set.clear()
     property_methods_set.clear()
     bound_properties.clear()
+
 
 def create_bound_methods(bind_methods_code: str) -> None:
     """
@@ -75,7 +78,8 @@ def create_bound_methods(bind_methods_code: str) -> None:
             if not name in property_methods_set:
                 bound_methods_set.add(qualified_name)
 
-def create_godot_doc(file: Path)->None:
+
+def create_godot_doc(file: Path) -> None:
     tree = et.parse(file)
     root = tree.getroot()
     data_node = root[0]
@@ -88,12 +92,14 @@ def create_godot_doc(file: Path)->None:
         create_member_data(godot_root, data_node)
         write_file(godot_root, class_name)
 
+
 def create_member_data(godot_root, data_node):
     members_node = et.SubElement(godot_root, "members")
     private_attribs = data_node.findall(".//sectiondef[@kind='private-attrib']")
     set_member_data(members_node, private_attribs[0])
 
-def create_method_data(godot_root: et.Element, data_node: et.Element)->None:
+
+def create_method_data(godot_root: et.Element, data_node: et.Element) -> None:
     """
     Retrieves public and protected functions from the doxygen XML so the
     function data can be extracted if it is bound in _bind_methods
@@ -109,7 +115,8 @@ def create_method_data(godot_root: et.Element, data_node: et.Element)->None:
     set_methods_data(output_methods_node, doxygen_methods_node)
     # todo: add handling of protected functions
 
-def get_class_name(data_node: et.Element)->str:
+
+def get_class_name(data_node: et.Element) -> str:
     """
     Gets the class name from the doxygen node's id attribute
     :param data_node: The doxygen XML node containing the class data
@@ -119,7 +126,8 @@ def get_class_name(data_node: et.Element)->str:
     name = class_name.replace("class", "")
     return name
 
-def get_implementation_file_name(doxygen_data_node: et.Element)->str:
+
+def get_implementation_file_name(doxygen_data_node: et.Element) -> str:
     """
     Loops through protected static functions looking for the _bind_methods function
     :param doxygen_data_node: the main node containing the class data from the doxygen XML file
@@ -135,7 +143,8 @@ def get_implementation_file_name(doxygen_data_node: et.Element)->str:
             return src_file_name
     return None
 
-def get_property_values(property_match: str)->dict[str, str]:
+
+def get_property_values(property_match: str) -> dict[str, str]:
     """
     Separates the PropertyInfo from the property_match into separate values for the methods, and backing field
     :param property_match: the PropertyInfo declaration from the _bind_methods function
@@ -150,7 +159,8 @@ def get_property_values(property_match: str)->dict[str, str]:
     property_values["getter"] = values[3]
     return property_values
 
-def load_godot_bindings(src_file: Path, class_name: str)->None:
+
+def load_godot_bindings(src_file: Path, class_name: str) -> None:
     """
     Parses the implementation code file, to extract the method and property bindings
     :param src_file: the implementation code file for the current class documentation being parsed
@@ -168,6 +178,7 @@ def load_godot_bindings(src_file: Path, class_name: str)->None:
     else:
         print(f"_bind_methods function not found in {src_file}")
 
+
 def map_godot_bindings(bind_method_code: str) -> None:
     """
     Adds bound methods, properties and constants from the implementation file to a set, so that the set can be
@@ -183,6 +194,7 @@ def map_godot_bindings(bind_method_code: str) -> None:
         create_bound_methods(bound_methods_match.group(1))
     else:
         print(f"Unknown error could not get content of _bind_methods function")
+
 
 def map_property_bindings(bind_methods_code: str) -> None:
     """
@@ -200,7 +212,7 @@ def map_property_bindings(bind_methods_code: str) -> None:
         property_methods_set.add(property_values["getter"])
 
 
-def set_brief_description(godot_node: et.Element, data_node:et.Element)->None:
+def set_brief_description(godot_node: et.Element, data_node: et.Element) -> None:
     """
     Gets the brief description from the doxygen node's briefdescription tag
     and adds it as the brief_description node to the Godot XML node.
@@ -213,7 +225,8 @@ def set_brief_description(godot_node: et.Element, data_node:et.Element)->None:
     brief = et.SubElement(godot_node, "brief_description")
     brief.text = text_node.text
 
-def set_description(godot_node: et.Element, data_node: et.Element)->None:
+
+def set_description(godot_node: et.Element, data_node: et.Element) -> None:
     """
     Adds brief_description and description tags to the Godot XML node
     after finding the data in the doxygen data node
@@ -224,7 +237,8 @@ def set_description(godot_node: et.Element, data_node: et.Element)->None:
     set_brief_description(godot_node, data_node)
     set_detailed_description(godot_node, data_node)
 
-def set_detailed_description(godot_node: et.Element, data_node: et.Element)->None:
+
+def set_detailed_description(godot_node: et.Element, data_node: et.Element) -> None:
     """
     Adds description tags to the Godot XML node after looking it up in the doxygen XML node
     :param godot_node: The Godot XML node to add the description tag to
@@ -236,27 +250,30 @@ def set_detailed_description(godot_node: et.Element, data_node: et.Element)->Non
     detailed = et.SubElement(godot_node, "description")
     detailed.text = text_node.text
 
-def set_member_data(godot_members_node:et.Element, doxygen_node:et.Element)->None:
+
+def set_member_data(godot_members_node: et.Element, doxygen_node: et.Element) -> None:
     for doxygen_member_node in doxygen_node:
         name_node = doxygen_member_node.find("name")
         if name_node.text in bound_properties:
-           property_values = bound_properties[name_node.text]
-           output_member_node = et.SubElement(godot_members_node, "member")
-           output_member_node.set("name", name_node.text)
-           output_member_node.set("setter", property_values["setter"])
-           output_member_node.set("getter", property_values["getter"])
-           type_node = doxygen_member_node.find("type")
-           type_value = type_node.text
-           if type_value.startswith("Ref<"):
-               type_pattern =  r"<(.*?)>"
-               type_match = re.search(type_pattern, type_value)
-               if type_match:
-                output_member_node.set("type",type_match.group(1).strip() )
-           else:
-               output_member_node.set("type",type_value)
+            property_values = bound_properties[name_node.text]
+            output_member_node = et.SubElement(godot_members_node, "member")
+            output_member_node.set("name", name_node.text)
+            output_member_node.set("setter", property_values["setter"])
+            output_member_node.set("getter", property_values["getter"])
+            type_node = doxygen_member_node.find("type")
+            type_value = type_node.text
+            if type_value.startswith("Ref<"):
+                type_pattern = r"<(.*?)>"
+                type_match = re.search(type_pattern, type_value)
+                if type_match:
+                    output_member_node.set("type", type_match.group(1).strip())
+            else:
+                output_member_node.set("type", type_value)
+            description_node = doxygen_member_node.find("detaileddescription")
+            if description_node is not None:
+                output_member_node.text = description_node[0].text
 
-
-def set_method_data(output_methods_node: et.Element, doxygen_method_node: et.Element)->None:
+def set_method_data(output_methods_node: et.Element, doxygen_method_node: et.Element) -> None:
     """
     extracts data from the method node in the doxygen XML file, and creates a node
     in the output class docs XML methods node.
@@ -276,7 +293,8 @@ def set_method_data(output_methods_node: et.Element, doxygen_method_node: et.Ele
         return_value_type = "void"
     return_type.set('type', return_value_type)
 
-def set_methods_data(output_methods_node: et.Element, doxygen_methods_node: et.Element)->None:
+
+def set_methods_data(output_methods_node: et.Element, doxygen_methods_node: et.Element) -> None:
     """
     Mostly acts a gatekeeper, this function loops through the methods in the doxygen methods node
     if the function is mapped as being bound in _bind_methods, the node is passed to add_method_data
@@ -290,7 +308,8 @@ def set_methods_data(output_methods_node: et.Element, doxygen_methods_node: et.E
         if qualified_name_node.text in bound_methods_set:
             set_method_data(output_methods_node, doxygen_method_node)
 
-def write_file(godot_root : et.Element, class_name : str)->bool:
+
+def write_file(godot_root: et.Element, class_name: str) -> bool:
     """
     Writes the Godot XML tree to the output file
     :param godot_root: The root node of the Godot XML tree
@@ -305,7 +324,7 @@ def write_file(godot_root : et.Element, class_name : str)->bool:
     try:
         tree.write(file_name, encoding="utf-8", xml_declaration=True)
         result = True
-    except(OSError,IOError) as e:
+    except(OSError, IOError) as e:
         # Catches issues like permission denied or invalid paths
         print(f"File system error: {e}")
     except Exception as e:
@@ -314,11 +333,13 @@ def write_file(godot_root : et.Element, class_name : str)->bool:
 
     return result
 
-def parse_class_xml_files()->None:
+
+def parse_class_xml_files() -> None:
     files = list(Path(xml_input_folder).rglob('class*.xml'))
     for file in files:
         clear_tracked_bindings()
         create_godot_doc(file)
+
 
 parse_class_xml_files()
 print("Destination: " + dest_folder)

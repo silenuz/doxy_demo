@@ -39,11 +39,11 @@ class TrafficLight : public godot::Control
 
     TextureRect *texture_rect;
 
-    Ref<Texture2D> go_texture; /**< The Texture2D used for displaying the TrafficLight's Go state */
-    Ref<Texture2D> stop_texture;/**< The Texture2D used for displaying the TrafficLight's Stop state */
-    Ref<Texture2D> caution_texture;/**< The Texture2D used for displaying the TrafficLight's Caution state */
+    Ref<Texture2D> go_texture; /**< The Texture2D used for displaying the Go state */
+    Ref<Texture2D> stop_texture;/**< The Texture2D used for displaying the Stop state */
+    Ref<Texture2D> caution_texture;/**< The Texture2D used for displaying the Caution state */
 
-    TrafficLightType light_type;/**< The state of the TrafficLight (Go,Caution,Stop) */
+    TrafficLightType light_type;/**< The current state (Go,Caution,Stop) */
 
 protected:
 	/**
