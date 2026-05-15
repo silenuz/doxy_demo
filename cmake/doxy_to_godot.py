@@ -149,9 +149,7 @@ def get_property_values(property_match: str) -> dict[str, str]:
     :param property_match: the PropertyInfo declaration from the _bind_methods function
     :return: A dictionary containing the methods and backing field for the property
     """
-    # todo: fix bug where commas in hint cause setter and getter methods to not be properly tracked
     values = re.findall(r'"(.*?)"', property_match)
-
     property_values = dict()
     property_values["field"] = values[0]
     property_values["setter"] = values[2]
