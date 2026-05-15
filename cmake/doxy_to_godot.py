@@ -198,7 +198,7 @@ def map_property_bindings(bind_methods_code: str) -> None:
         bound_properties[field] = property_values
         property_methods_set.add(property_values["setter"])
         property_methods_set.add(property_values["getter"])
-    print("bound_properties:", bound_properties)
+
 
 def set_brief_description(godot_node: et.Element, data_node:et.Element)->None:
     """
