@@ -10,7 +10,6 @@
 """
 import re
 import sys
-from os import MFD_ALLOW_SEALING
 from pathlib import Path
 from xml.etree import ElementTree as et
 
