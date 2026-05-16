@@ -45,7 +45,6 @@ class TrafficLight : public godot::Control {
 
 protected:
 	/**
-	 ** nnnnn
 	 * You must declare a protected static void _bind_methods() function in your class header.
 	 */
 	static void _bind_methods();
