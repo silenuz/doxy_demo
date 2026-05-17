@@ -8,7 +8,7 @@
 #define GODOT_CPP_TEMPLATE_TRAFFIC_LIGHT_H
 #pragma once
 
-#include <godot_cpp //classes/control.hpp>
+#include <godot_cpp/classes/control.hpp>
 #include <godot_cpp/classes/texture2d.hpp>
 #include <godot_cpp/classes/texture_rect.hpp>
 

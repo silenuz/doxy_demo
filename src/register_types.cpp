@@ -6,6 +6,8 @@
 #include <godot_cpp/godot.hpp>
 
 #include "example_class.h"
+#include "summator.h"
+#include "traffic_light.h"
 
 using namespace godot;
 
@@ -15,6 +17,8 @@ void initialize_gdextension_types(ModuleInitializationLevel p_level)
 		return;
 	}
 	GDREGISTER_CLASS(ExampleClass);
+	GDREGISTER_CLASS(Summator);
+	GDREGISTER_CLASS(TrafficLight)
 }
 
 void uninitialize_gdextension_types(ModuleInitializationLevel p_level) {
