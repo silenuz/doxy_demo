@@ -135,6 +135,7 @@ function(generate_doc_source OUTPUT_PATH SOURCES)
     get_filename_component(OUTPUT_DIR "${OUTPUT_PATH}" DIRECTORY)
     file(MAKE_DIRECTORY ${OUTPUT_DIR})
 
+    message(STATUS "PYTHON DOC LIST: ${PYTHON_LIST}")
     # Python one-liner to run our command
     # lists in CMake are just strings delimited by ';', so this works.
     set(PYTHON_SCRIPT
@@ -166,7 +167,7 @@ function(target_doc_sources TARGET SOURCES)
 
     # Create the file generation target, this won't be triggered unless a target
     # that depends on DOC_SOURCE_FILE is built
-    generate_doc_source( "${DOC_SOURCE_FILE}" ${SOURCES} )
+    generate_doc_source( "${DOC_SOURCE_FILE}" "${SOURCES}" )
 
     # Add DOC_SOURCE_FILE as a dependency to TARGET
     target_sources(${TARGET} PRIVATE "${DOC_SOURCE_FILE}")

@@ -182,8 +182,8 @@ def get_tag_text(doxygen_node: et.Element) -> str:
     :param doxygen_node: the node to get the text from
     :return: the full content of the text attribute of the doxygen node
     """
-    text = "".join(doxygen_node.itertext())
-    return text
+   # text = "".join(doxygen_node.itertext())
+    return doxygen_node[0].text
 
 
 def load_godot_bindings(src_file: Path, class_name: str) -> None:

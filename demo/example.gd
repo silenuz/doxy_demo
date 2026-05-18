@@ -5,3 +5,4 @@ func _ready() -> void:
 	var example := ExampleClass.new()
 	example.print_type(example)
 	var sum = Summator.new()
+	var tl = TrafficLight.new()
