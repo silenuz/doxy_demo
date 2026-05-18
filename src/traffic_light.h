@@ -56,7 +56,7 @@ protected:
 
 public:
 	/**
-	 *
+	 * constructor
 	 */
 	TrafficLight();
 
