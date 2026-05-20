@@ -9,6 +9,7 @@
 @Author: Silenuz Nowan (silenuznowan@Yahoo.com)
 """
 import re
+from collections import namedtuple
 import sys
 from pathlib import Path
 from xml.etree import ElementTree as et
@@ -28,6 +29,22 @@ property_methods_set = set()
 # track property definitions
 bound_properties = dict()
 
+# track opening and closing markup for bbcode to translate html markup in element text attibutes
+BBCodeMap = namedtuple("BBCodeMap", ["open","close"])
+bbc_bold = BBCodeMap(open="[b]", close=r"[/b]")
+bbc_italic = BBCodeMap(open="[i]", close=r"[/i]")
+bbc_underline = BBCodeMap(open="[u]", close=r"[/u]")
+bbc_strikethrough = BBCodeMap(open="[s]", close=r"[/s]")
+bbc_code = BBCodeMap(open="[code]", close=r"[/code]")
+bbc_keyboard = BBCodeMap(open="[kbd]", close=r"[/kbd]")
+bbc_linebreak = BBCodeMap(open="[br]", close=r"")
+bbc_link =BBCodeMap(open="[url]", close=r"[/url]")
+
+format_map = dict()
+format_map["bold"] = bbc_bold
+format_map["emphasis"] = bbc_italic
+format_map["strike"] = bbc_strikethrough
+format_map["underline"] = bbc_underline
 
 def catalog_bindings(doxygen_data_node: et.Element, class_name: str) -> bool:
     """
@@ -182,8 +199,23 @@ def get_tag_text(doxygen_node: et.Element) -> str:
     :param doxygen_node: the node to get the text from
     :return: the full content of the text attribute of the doxygen node
     """
-   # text = "".join(doxygen_node.itertext())
-    return doxygen_node[0].text
+    parts = []
+    if doxygen_node[0].text:
+        parts.append(doxygen_node[0].text.strip())
+
+    for mixed_element_node in doxygen_node[0]:
+        if mixed_element_node.tag in format_map:
+            markup = format_map[mixed_element_node.tag]
+            content = markup.open + mixed_element_node.text.strip() + markup.close
+            parts.append(content)
+        elif mixed_element_node.tag == "godot":
+            parts.append(mixed_element_node.text.strip())
+
+        if mixed_element_node.tail:
+            parts.append(mixed_element_node.tail)
+
+    text = "".join(parts)
+    return text
 
 
 def load_godot_bindings(src_file: Path, class_name: str) -> None:
@@ -368,7 +400,7 @@ def write_file(godot_root: et.Element, class_name: str) -> bool:
     file_name = dest_folder + "/" + class_name + ".xml"
 
     try:
-        tree.write(file_name, encoding="utf-8", xml_declaration=True,short_empty_elements=False)
+        tree.write(file_name, encoding="utf-8", xml_declaration=True, short_empty_elements=False)
         result = True
     except(OSError, IOError) as e:
         # Catches issues like permission denied or invalid paths
