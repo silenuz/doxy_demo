@@ -15,13 +15,22 @@ if(DOXYGEN_FOUND)
     #set(DOXYGEN_PROJECT_ICON "${CMAKE_CURRENT_SOURCE_DIR}/icon.ico")
 
     # Output format settings
-    set(DOXYGEN_GENERATE_HTML NO)
+    set(DOXYGEN_GENERATE_HTML YES)
     set(DOXYGEN_GENERATE_LATEX NO)
     set(DOXYGEN_GENERATE_MAN NO)
     set(DOXYGEN_GENERATE_RTF NO)
 
     # generate xml so it can be later converted to Godot class documentation
     set(DOXYGEN_GENERATE_XML YES)
+
+    # create an alias so we can use @glnk{} or \glnk{} in comments to create output for Godot documentation only
+    # so that doxygen xmle remains compatible with Breathe.
+    set(DOXYGEN_ALIASES
+            "glnk{1}=\"\\xmlonly <godot>[</godot>  \\endxmlonly \\1 \\xmlonly <godot>]</godot> \\endxmlonly \""
+    )
+
+
+   set(DOXYGEN_VERBATIM_VARS DOXYGEN_ALIASES)
 
     # set directory to create the docs in
     set(DOXYGEN_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/docs)
