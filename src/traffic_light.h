@@ -26,9 +26,9 @@ enum TrafficLightType {
 
 /**
  * @class TrafficLight
- * @brief A classic code example for a GDExtension from Godotcon 2024
+ * @brief A classic code example ~~stolen~~ **borrowed** from _Godotcon 2024_
  *
- * The class must inherit from a Godot built in class (like Object, Node, Sprite2D, or Resource).
+ * The class <u>must inherit</u> from a Godot built in class (like @glnk{Object}, @glnk{Node}, @glnk{Sprite2D}, or @glnk{Resource}).
  * Godot does not support multiple inheritance for GDExtension classes.
  *
  */

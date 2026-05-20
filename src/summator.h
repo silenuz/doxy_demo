@@ -15,9 +15,9 @@ using namespace godot;
 
 /**
  * @class Summator
- * @brief A classic code example for a GDExtension
+ * @brief A _classic_ code example for a **GDExtension**
  *
- * The class must inherit from a Godot built in class (like Object, Node, Sprite2D, or Resource).
+ * The class must inherit from a Godot built in class (like @glnk{Object}, @glnk{Node}, @glnk{Sprite2D}, or @glnk{Resource}).
  * Godot does not support multiple inheritance for GDExtension classes.
  *
  */
