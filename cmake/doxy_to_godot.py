@@ -368,7 +368,7 @@ def write_file(godot_root: et.Element, class_name: str) -> bool:
     file_name = dest_folder + "/" + class_name + ".xml"
 
     try:
-        tree.write(file_name, encoding="utf-8", xml_declaration=True)
+        tree.write(file_name, encoding="utf-8", xml_declaration=True,short_empty_elements=False)
         result = True
     except(OSError, IOError) as e:
         # Catches issues like permission denied or invalid paths
