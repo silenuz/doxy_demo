@@ -200,21 +200,46 @@ def get_tag_text(doxygen_node: et.Element) -> str:
     :return: the full content of the text attribute of the doxygen node
     """
     parts = []
-    if doxygen_node[0].text:
-        parts.append(doxygen_node[0].text.strip())
+    if doxygen_node.text:
+        parts.append(doxygen_node.text.strip())
 
-    for mixed_element_node in doxygen_node[0]:
+    for mixed_element_node in doxygen_node:
+        element_text = parse_xml_text(mixed_element_node)
+        parts.append(element_text)
+        parts.append(bbc_linebreak.open)
+
+    text = " ".join(parts)
+    print("PARTS::", text.strip().removesuffix('[br]'))
+    return text.strip().removesuffix('[br]')
+
+
+def parse_xml_text(doxygen_node:et.Element)->str:
+    parts = []
+
+    if doxygen_node.text:
+        parts.append(doxygen_node.text.strip())
+
+    has_open_godot_node = False
+
+    for mixed_element_node in doxygen_node:
         if mixed_element_node.tag in format_map:
             markup = format_map[mixed_element_node.tag]
             content = markup.open + mixed_element_node.text.strip() + markup.close
             parts.append(content)
         elif mixed_element_node.tag == "godot":
-            parts.append(mixed_element_node.text.strip())
+            if has_open_godot_node:
+                parts[-1] = parts[-1] + mixed_element_node.text.strip()
+                has_open_godot_node = False
+            else:
+                has_open_godot_node = True
+                #parts.append(mixed_element_node.text.strip())
+                parts.append(mixed_element_node.text.strip() + mixed_element_node.tail.strip())
 
         if mixed_element_node.tail:
-            parts.append(mixed_element_node.tail)
+            if not has_open_godot_node:
+                parts.append(mixed_element_node.tail.strip())
 
-    text = "".join(parts)
+    text = " ".join(parts)
     return text
 
 
