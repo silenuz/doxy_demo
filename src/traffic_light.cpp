@@ -44,7 +44,8 @@ void TrafficLight::_bind_methods()
 
     BIND_ENUM_CONSTANT(TrafficLightType::TRAFFIC_LIGHT_GO)
     BIND_ENUM_CONSTANT(TrafficLightType::TRAFFIC_LIGHT_STOP)
-    BIND_ENUM_CONSTANT(TrafficLightType::TRAFFIC_LIGHT_CAUTION)
+	BIND_ENUM_CONSTANT(TrafficLightType::TRAFFIC_LIGHT_CAUTION)
+
 }
 
 void TrafficLight::_notification(int p_what)
