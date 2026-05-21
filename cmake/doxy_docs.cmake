@@ -26,7 +26,9 @@ if(DOXYGEN_FOUND)
     # create an alias so we can use @glnk{} or \glnk{} in comments to create output for Godot documentation only
     # so that doxygen xmle remains compatible with Breathe.
     set(DOXYGEN_ALIASES
-            "glnk{1}=\"\\xmlonly<godot>[</godot>\\endxmlonly\\1\\xmlonly<godot>]</godot>\\endxmlonly \""
+            "glnk{1}=\"\\xmlonly<godot>[</godot>\\endxmlonly\\1\\xmlonly<godot>]</godot>\\endxmlonly\""
+            "gdcon{2}=\"\\xmlonly<godot>[constant</godot>\\endxmlonly\\1.\\2\\xmlonly<godot>]</godot>\\endxmlonly\""
+            "gdenu{2}=\"\\xmlonly<godot>[enum \\1.</godot>\\endxmlonly\\2\\xmlonly<godot>]</godot>\\endxmlonly\""
     )
 
 
