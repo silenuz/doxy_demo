@@ -39,15 +39,15 @@ class TrafficLight : public godot::Control {
 
 	TextureRect *texture_rect;
 
-	Ref<Texture2D> go_texture; /**< The Texture2D used for displaying the Go state */
-	Ref<Texture2D> stop_texture; /**< The Texture2D used for displaying the Stop state */
-	Ref<Texture2D> caution_texture; /**< The Texture2D used for displaying the Caution state */
+	Ref<Texture2D> go_texture; /**< The @glnk{Texture2D} used for displaying the Go state */
+	Ref<Texture2D> stop_texture; /**< The @glnk{Texture2D} used for displaying the Stop state */
+	Ref<Texture2D> caution_texture; /**< The @glnk{Texture2D} used for displaying the Caution state */
 
-	TrafficLightType light_type; /**< The current state (Go,Caution,Stop) */
+	TrafficLightType light_type; /**< The current state of the traffic light (Go, Caution, Stop ), see @gdenu{TrafficLight,TrafficLightType} */
 
 protected:
 	/**
-	 * You must declare a protected static void _bind_methods() function in your class header.
+	 * You must declare a protected static void `_bind_methods()` function in your class header.
 	 */
 	static void _bind_methods();
 	/**
@@ -63,49 +63,49 @@ public:
 	TrafficLight();
 
 	/**
-	 * Sets the Texture2D to be used when the light is in a Go state
+	 * Sets the @glnk{Texture2D} to be used when the light is in a (Go state
 	 * @param p_texture the texture to be used
 	 */
 	void set_go_texture(const Ref<Texture2D> &p_texture);
 
 	/**
-	 * Gets the Texture2D that acts as the texture for the Go state
-	 * @return the current Texture2D being used to represent Go
+	 * Gets the @glnk{Texture2D} that acts as the texture for the Go state
+	 * @return the current @glnk{Texture2D} being used to represent Go
 	 */
 	Ref<Texture2D> get_go_texture() const;
 
 	/**
-	 * Sets the Texture2D to be used when the light is in a Caution state
+	 * Sets the @glnk{Texture2D} to be used when the light is in a Caution state
 	 * @param p_texture the texture to be used
 	 */
 	void set_caution_texture(const Ref<Texture2D> &p_texture);
 
 	/**
-	 * Gets the Texture2D that acts as the texture for the Caution state
+	 * Gets the @glnk{Texture2D} that acts as the texture for the Caution state
 	 * @return the current Texture2D being used to represent Caution
 	 */
 	Ref<Texture2D> get_caution_texture() const;
 
 	/**
-	 * Sets the Texture2D to be used when the light is in a Stop state
+	 * Sets the @glnk{Texture2D} to be used when the light is in a Stop state
 	 * @param p_texture the texture to be used
 	 */
 	void set_stop_texture(const Ref<Texture2D> &p_texture);
 
 	/**
-	 * Gets the Texture2D that acts as the texture for the Stop state
+	 * Gets the @glnk{Texture2D} that acts as the texture for the Stop state
 	 * @return the current Texture2D being used to represent Stop
 	 */
 	Ref<Texture2D> get_stop_texture() const;
 
 	/**
-	 *  Sets the current state of the light, go, caution, stop
+	 * Sets the current state of the light to a value from @gdenu{TrafficLight,TrafficLightType}
 	 * @param p_light_type the traffic light type enumerator
 	 */
 	void set_light_type(TrafficLightType p_light_type);
 
 	/**
-	 *  Gets the current state of the traffic light, (go,caution,stop)
+	 * Gets the current state of the traffic light, a value from @gdenu{TrafficLight,TrafficLightType}
 	 * @return the traffic light type enumerator for the current light state(go,caution,stop)
 	 */
 	TrafficLightType get_light_type() const;
