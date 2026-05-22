@@ -9,6 +9,7 @@
 @Author: Silenuz Nowan (silenuznowan@Yahoo.com)
 """
 import re
+import importlib.util
 from collections import namedtuple
 import sys
 from pathlib import Path
@@ -17,6 +18,23 @@ from xml.etree import ElementTree as et
 xml_input_folder = sys.argv[1]
 dest_folder = sys.argv[2]
 src_folder = Path(dest_folder).parent
+
+template_methods_path = next(src_folder.rglob("methods.py"))
+module_name = "template_methods"
+template_methods_found = False
+methods_module = None
+
+if template_methods_path is not None:
+    try:
+        # try importing methods.py from the template build process so we can use colored printing
+        spec = importlib.util.spec_from_file_location(module_name, template_methods_path)
+        methods_module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(methods_module)
+        template_methods_found = True
+    except Exception as e:
+        print(f"Error during import: {e}")
+else:
+    print("methods.py not found")
 
 # track bound methods and properties for the current class being processed
 bound_methods_set = set()
@@ -68,7 +86,10 @@ def catalog_bindings(doxygen_data_node: et.Element, class_name: str) -> bool:
     # clear_tracked_bindings()
     code_file_name = get_implementation_file_name(doxygen_data_node)
     if code_file_name is None:
-        print("Unable to determine code implementation file for " + class_name)
+        if template_methods_found:
+            methods_module.print_warning("Unable to determine code implementation file for " + class_name)
+        else:
+            print("Unable to determine code implementation file for " + class_name)
         return False
     else:
         project_src = src_folder
@@ -77,7 +98,10 @@ def catalog_bindings(doxygen_data_node: et.Element, class_name: str) -> bool:
             load_godot_bindings(code_file, class_name)
             return True
         else:
-            print("File not found " + code_file_name)
+            if template_methods_found:
+                methods_module.print_error("Code Implementation File not found " + code_file_name)
+            else:
+                print("Code Implementation File not found " + code_file_name)
             return False
 
 
