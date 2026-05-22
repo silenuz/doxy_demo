@@ -42,8 +42,7 @@ class TrafficLight : public godot::Control {
 	Ref<Texture2D> go_texture; /**< The @glnk{Texture2D} used for displaying the Go state */
 	Ref<Texture2D> stop_texture; /**< The @glnk{Texture2D} used for displaying the Stop state */
 	Ref<Texture2D> caution_texture; /**< The @glnk{Texture2D} used for displaying the Caution state */
-
-	TrafficLightType light_type; /**< The current state of the traffic light (Go, Caution, Stop ), see @gdenu{TrafficLight,TrafficLightType} */
+	TrafficLightType light_type; /**< The current,state of the traffic light (Go, Caution, Stop ), see @gdenu{TrafficLight,TrafficLightType} */
 
 protected:
 	/**

@@ -18,7 +18,6 @@ xml_input_folder = sys.argv[1]
 dest_folder = sys.argv[2]
 src_folder = Path(dest_folder).parent
 
-
 # track bound methods and properties for the current class being processed
 bound_methods_set = set()
 
@@ -26,11 +25,20 @@ bound_methods_set = set()
 # and not the methods output
 property_methods_set = set()
 
+# track bound enum constants
+bound_enums_set = set()
+
+# track xml tags that should not be parsed, such as htmlonly
+element_black_list_set = set()
+element_black_list_set.add("htmlonly")
+element_black_list_set.add("manonly")
+element_black_list_set.add("latexonly")
+
 # track property definitions
 bound_properties = dict()
 
 # track opening and closing markup for bbcode to translate html markup in element text attibutes
-BBCodeMap = namedtuple("BBCodeMap", ["open","close"])
+BBCodeMap = namedtuple("BBCodeMap", ["open", "close"])
 bbc_bold = BBCodeMap(open="[b]", close=r"[/b]")
 bbc_italic = BBCodeMap(open="[i]", close=r"[/i]")
 bbc_underline = BBCodeMap(open="[u]", close=r"[/u]")
@@ -38,13 +46,14 @@ bbc_strikethrough = BBCodeMap(open="[s]", close=r"[/s]")
 bbc_code = BBCodeMap(open="[code]", close=r"[/code]")
 bbc_keyboard = BBCodeMap(open="[kbd]", close=r"[/kbd]")
 bbc_linebreak = BBCodeMap(open="[br]", close=r"")
-bbc_link =BBCodeMap(open="[url]", close=r"[/url]")
+bbc_link = BBCodeMap(open="[url]", close=r"[/url]")
 
 format_map = dict()
 format_map["bold"] = bbc_bold
 format_map["emphasis"] = bbc_italic
 format_map["strike"] = bbc_strikethrough
 format_map["underline"] = bbc_underline
+
 
 def catalog_bindings(doxygen_data_node: et.Element, class_name: str) -> bool:
     """
@@ -80,6 +89,14 @@ def clear_tracked_bindings() -> None:
     bound_methods_set.clear()
     property_methods_set.clear()
     bound_properties.clear()
+    bound_enums_set.clear()
+
+
+def create_bound_enums(bind_method_code: str) -> None:
+    bound_enum_pattern = r"(?<=BIND_ENUM_CONSTANT)\((.*?)\)"
+    bound_enum_matches = re.findall(bound_enum_pattern, bind_method_code)
+    for bound_enum_match in bound_enum_matches:
+        bound_enums_set.add(bound_enum_match)
 
 
 def create_bound_methods(bind_methods_code: str) -> None:
@@ -206,39 +223,49 @@ def get_tag_text(doxygen_node: et.Element) -> str:
     for mixed_element_node in doxygen_node:
         element_text = parse_xml_text(mixed_element_node)
         parts.append(element_text)
-        parts.append(bbc_linebreak.open)
+        if mixed_element_node.tag == 'para':
+            parts.append(bbc_linebreak.open)
+            parts.append(bbc_linebreak.open)
 
     text = " ".join(parts)
-    print("PARTS::", text.strip().removesuffix('[br]'))
-    return text.strip().removesuffix('[br]')
+
+    # todo: fix the above so this is not needed it's pretty ridiculous
+    tmp = text.strip()
+    while tmp.endswith(bbc_linebreak.open):
+        tmp = tmp.removesuffix(bbc_linebreak.open).strip()
+
+    return tmp
 
 
-def parse_xml_text(doxygen_node:et.Element)->str:
+def parse_xml_text(doxygen_node: et.Element) -> str:
     parts = []
+
+    if doxygen_node.tag in element_black_list_set:
+        return ""
 
     if doxygen_node.text:
         parts.append(doxygen_node.text.strip())
 
-    has_open_godot_node = False
-
     for mixed_element_node in doxygen_node:
-        if mixed_element_node.tag in format_map:
-            markup = format_map[mixed_element_node.tag]
-            content = markup.open + mixed_element_node.text.strip() + markup.close
-            parts.append(content)
-        elif mixed_element_node.tag == "godot":
-            if has_open_godot_node:
-                parts[-1] = parts[-1] + mixed_element_node.text.strip()
-                has_open_godot_node = False
-            else:
-                has_open_godot_node = True
-                #parts.append(mixed_element_node.text.strip())
-                parts.append(mixed_element_node.text.strip() + mixed_element_node.tail.strip())
+        if len(mixed_element_node):
+            content = parse_xml_text(mixed_element_node)
+            parts.append(content.strip())
+        else:
+            if mixed_element_node.tag in format_map:
+                markup = format_map[mixed_element_node.tag]
+                content = markup.open + mixed_element_node.text.strip() + markup.close
+                parts.append(content)
+            elif mixed_element_node.tag == "godotonly":
+                if mixed_element_node.get('position') == "close":
+                    parts[-1] = parts[-1] + mixed_element_node.get("content")
+                else:
+                    parts.append(mixed_element_node.get("content") + mixed_element_node.tail.strip())
 
-        if mixed_element_node.tail:
-            if not has_open_godot_node:
-                parts.append(mixed_element_node.tail.strip())
+            if not mixed_element_node.tail is None:
+                if not mixed_element_node.tag == "godotonly" and not mixed_element_node.tail == ' ':
+                    parts.append(mixed_element_node.tail.strip())
 
+    # todo: fix above so extra spaces are not generated
     text = " ".join(parts)
     return text
 
@@ -275,6 +302,7 @@ def map_godot_bindings(bind_method_code: str) -> None:
     if bound_methods_match:
         map_property_bindings(bound_methods_match.group(1))
         create_bound_methods(bound_methods_match.group(1))
+        create_bound_enums(bound_methods_match.group(1))
     else:
         print(f"Unknown error could not get content of _bind_methods function")
 
