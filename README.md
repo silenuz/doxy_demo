@@ -1,3 +1,8 @@
+IMPORTANT
+---------
+**Due to some changes today, output is not correct**.  
+Monday it will be fixed.
+
 Simple demonstration using a cmake and a python script to generate godot docs from doxygen XML
 
 Configure:
