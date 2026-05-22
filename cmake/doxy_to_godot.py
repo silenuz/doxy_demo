@@ -267,6 +267,9 @@ def parse_xml_text(doxygen_node: et.Element) -> str:
     if doxygen_node.tag in element_black_list_set:
         return ""
 
+    if not doxygen_node.text is None:
+        parts.append(doxygen_node.text.strip())
+
     for mixed_element_node in doxygen_node:
         if mixed_element_node.tag in format_map:
             markup = format_map[mixed_element_node.tag]
@@ -277,15 +280,17 @@ def parse_xml_text(doxygen_node: et.Element) -> str:
             parts.append(content)
             if len(mixed_element_node):
                 child_content = parse_xml_text(mixed_element_node)
-                parts[-1] = parts[-1] + child_content
+                parts[-1] = parts[-1] + child_content.strip()
             parts[-1] = parts[-1] + markup.close
         elif mixed_element_node.tag == "godotonly":
             if mixed_element_node.get('position') == "close":
                 parts[-1] = parts[-1] + mixed_element_node.get("content")
             else:
                 parts.append(mixed_element_node.get("content") + mixed_element_node.tail.strip())
+        elif mixed_element_node.text is not None:
+            parts.append(mixed_element_node.text.strip())
 
-        if not mixed_element_node.tail is None and not mixed_element_node.tail is None:
+        if not mixed_element_node.tail is None and not mixed_element_node.tail == " ":
             if mixed_element_node.tag == "godotonly":
                 parts[-1] = parts[-1] + mixed_element_node.tail.strip()
             else:
