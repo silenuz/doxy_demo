@@ -43,7 +43,6 @@ if(DOXYGEN_FOUND)
             "gdpar{1}=\"\\xmlonly${GODOT_LINK_START}param\\\"></godotonly>\\endxmlonly\\1\\xmlonly${GODOT_LINK_CLOSE}\\endxmlonly\""
     )
 
-
    set(DOXYGEN_VERBATIM_VARS DOXYGEN_ALIASES)
 
     # set directory to create the docs in
