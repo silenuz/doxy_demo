@@ -284,16 +284,12 @@ def parse_xml_text(doxygen_node: et.Element) -> str:
             parts[-1] = parts[-1] + markup.close
         elif mixed_element_node.tag == "godotonly":
             if mixed_element_node.get('position') == "close":
-                parts[-1] = parts[-1] + mixed_element_node.get("content")
+                parts[-1] = parts[-1] + mixed_element_node.get("content") + mixed_element_node.tail.strip()
             else:
                 parts.append(mixed_element_node.get("content") + mixed_element_node.tail.strip())
-        elif mixed_element_node.text is not None:
-            parts.append(mixed_element_node.text.strip())
 
         if not mixed_element_node.tail is None and not mixed_element_node.tail == " ":
-            if mixed_element_node.tag == "godotonly":
-                parts[-1] = parts[-1] + mixed_element_node.tail.strip()
-            else:
+           if not mixed_element_node.tag == "godotonly":
                 parts.append(mixed_element_node.tail.strip())
 
     text = " ".join(parts)
