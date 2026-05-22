@@ -243,32 +243,34 @@ def parse_xml_text(doxygen_node: et.Element) -> str:
     if doxygen_node.tag in element_black_list_set:
         return ""
 
-    if doxygen_node.text:
-        parts.append(doxygen_node.text.strip())
-
     for mixed_element_node in doxygen_node:
-        if len(mixed_element_node):
-            content = parse_xml_text(mixed_element_node)
-            parts.append(content.strip())
-        else:
-            if mixed_element_node.tag in format_map:
-                markup = format_map[mixed_element_node.tag]
-                content = markup.open + mixed_element_node.text.strip() + markup.close
-                parts.append(content)
-            elif mixed_element_node.tag == "godotonly":
-                if mixed_element_node.get('position') == "close":
-                    parts[-1] = parts[-1] + mixed_element_node.get("content") + " " + mixed_element_node.tail.strip()
-                else:
-                    parts.append(mixed_element_node.get("content") + mixed_element_node.tail.strip())
+        if mixed_element_node.tag in format_map:
+            markup = format_map[mixed_element_node.tag]
+            if not mixed_element_node.text is None:
+                content = markup.open + mixed_element_node.text.strip()
+            else:
+                content = markup.open
+            parts.append(content)
+            if len(mixed_element_node):
+                child_content = parse_xml_text(mixed_element_node)
+                parts[-1] = parts[-1] + child_content
+            parts[-1] = parts[-1] + markup.close
+        elif mixed_element_node.tag == "godotonly":
+            if mixed_element_node.get('position') == "close":
+                parts[-1] = parts[-1] + mixed_element_node.get("content")
+            else:
+                parts.append(mixed_element_node.get("content") + mixed_element_node.tail.strip())
 
-            if not mixed_element_node.tail is None:
-                if not mixed_element_node.tag == "godotonly" and not mixed_element_node.tail == ' ':
-                    parts.append(mixed_element_node.tail.strip())
+        if not mixed_element_node.tail is None:
+            if not mixed_element_node.tag == "godotonly" and not mixed_element_node.tail == ' ':
+                parts.append(mixed_element_node.tail.strip())
 
-    # todo: fix above so extra spaces are not generated
     text = " ".join(parts)
     return text
 
+
+def do_something():
+    pass
 
 def load_godot_bindings(src_file: Path, class_name: str) -> None:
     """
