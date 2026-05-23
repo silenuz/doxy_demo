@@ -20,6 +20,16 @@ using namespace godot;
  * The class must inherit from a Godot built in class (like @glnk{Object}, @glnk{Node}, @glnk{Sprite2D}, or @glnk{Resource}).
  * Godot does not support multiple inheritance for GDExtension classes.
  *
+ * Summator Example Usage:
+ *	\code{.gdscript}
+ *  var sum = Summator.new()
+ *	sum.add(5)
+ *	sum.add(7)
+ *	var total = sum.get_total()
+ *	# prints 12
+ *	print(total)
+ * \endcode
+ *
  */
 class Summator : public Object
 {
