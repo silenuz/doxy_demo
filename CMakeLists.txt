@@ -9,7 +9,7 @@ endif()
 
 set(LIBNAME "cooldemo")
 set(GODOT_PROJECT_DIR "demo" CACHE STRING "The directory of a Godot project folder")
-
+set(GODOTCPP_BUILD_PROFILE "${CMAKE_CURRENT_SOURCE_DIR}/build_profile.json")
 # Make sure all the dependencies are satisfied
 find_package(Python3 3.4 REQUIRED)
 find_program(GIT git REQUIRED)
