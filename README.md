@@ -11,7 +11,7 @@ Processing of signals is in progress and should be finished soon, as well code b
 in the next week or so.
 Here's what the current generated documentation appears like in the Godot editor:
 
-![Alt documentation_screenshot](/git_content/output_screenshot.png){height=25%}
+<img src="git_content/output_screenshot.png" height="25%">
 
 Description:
 ------------
