@@ -19,8 +19,8 @@ using namespace godot;
  * the traffic light enumerator is used to track the current state of the light (Go,Caution,Stop)
  */
 enum TrafficLightType {
-	TRAFFIC_LIGHT_GO, /**< Represents a light indicating Go*/
-	TRAFFIC_LIGHT_CAUTION, /**< Represents a light indicating Caution*/
+	TRAFFIC_LIGHT_GO , /**< Represents a light indicating Go*/
+	TRAFFIC_LIGHT_CAUTION = 500, /**< Represents a light indicating Caution*/
 	TRAFFIC_LIGHT_STOP /**< Represents a light indicating Stop*/
 };
 

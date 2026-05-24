@@ -44,7 +44,7 @@ bound_methods_set = set()
 property_methods_set = set()
 
 # track bound enum constants
-bound_enums_set = set()
+bound_enums_set = dict()
 
 # track xml tags that should not be parsed, such as htmlonly
 element_black_list_set = set()
@@ -71,6 +71,16 @@ format_map["bold"] = bbc_bold
 format_map["emphasis"] = bbc_italic
 format_map["strike"] = bbc_strikethrough
 format_map["underline"] = bbc_underline
+
+ClassInfo = namedtuple("ClassInfo", ["class_name", "reference"])
+
+def add_constants_node(godot_root: et.Element)->et.Element:
+    constants_node = godot_root.find("constants")
+    if not constants_node is None:
+        return constants_node
+    else:
+        constants_node = et.SubElement(godot_root, "constants")
+        return constants_node
 
 
 def catalog_bindings(doxygen_data_node: et.Element, class_name: str) -> bool:
@@ -120,7 +130,16 @@ def create_bound_enums(bind_method_code: str) -> None:
     bound_enum_pattern = r"(?<=BIND_ENUM_CONSTANT)\((.*?)\)"
     bound_enum_matches = re.findall(bound_enum_pattern, bind_method_code)
     for bound_enum_match in bound_enum_matches:
-        bound_enums_set.add(bound_enum_match)
+        values = bound_enum_match.split("::")
+        enumerator_name = values[0]
+        enumerator_value_name = values[1]
+        if enumerator_name not in bound_enums_set:
+            bound_enums_set[enumerator_name] = dict()
+        value_dict = dict()
+        value_dict["qualified_name"] = bound_enum_match
+        value_dict["enumerator_name"] = enumerator_name
+        value_dict["enumerator_value_name"] = enumerator_value_name
+        bound_enums_set[enumerator_name][enumerator_value_name] = value_dict
 
 
 def create_bound_methods(bind_methods_code: str) -> None:
@@ -143,6 +162,20 @@ def create_bound_methods(bind_methods_code: str) -> None:
                 bound_methods_set.add(qualified_name)
 
 
+def create_enumator_data(godot_root, reference)->None:
+    if len(bound_enums_set) < 1:
+        return
+    file_name = reference + ".xml"
+    xml_reference_file = next(Path(xml_input_folder).rglob(file_name), None)
+    if xml_reference_file:
+        preprocess_enumerator_constants(godot_root, xml_reference_file)
+    else:
+        if template_methods_found:
+            methods_module.print_error("Unable to generate enumerator constants, file not found ", file_name)
+        else:
+            print("Unable to generate enumerator constants, file not found ", file_name)
+
+
 def create_godot_doc(file: Path) -> None:
     """
     Creates godot XML class documentation from the doxygen XML file whose path is passed as the argument
@@ -152,14 +185,15 @@ def create_godot_doc(file: Path) -> None:
     tree = et.parse(file)
     root = tree.getroot()
     data_node = root[0]
-    class_name = get_class_name(data_node)
-    if catalog_bindings(data_node, class_name):
+    class_info = get_class_name(data_node)
+    if catalog_bindings(data_node, class_info.class_name):
         godot_root = et.Element('class')
-        godot_root.set('name', class_name)
+        godot_root.set('name', class_info.class_name)
         set_description(godot_root, data_node)
         create_method_data(godot_root, data_node)
         create_member_data(godot_root, data_node)
-        write_file(godot_root, class_name)
+        create_enumator_data(godot_root, class_info.reference)
+        write_file(godot_root, class_info.class_name)
 
 
 def create_member_data(godot_root: et.Element, data_node: et.Element) -> None:
@@ -191,7 +225,8 @@ def create_method_data(godot_root: et.Element, data_node: et.Element) -> None:
     # todo: add handling of protected functions
 
 
-def get_class_name(data_node: et.Element) -> str:
+def get_class_name(data_node: et.Element) -> ClassInfo:
+    # todo: update docstring for new method signature
     """
     Gets the class name from the doxygen node's id attribute
     :param data_node: The doxygen XML node containing the class data
@@ -199,7 +234,9 @@ def get_class_name(data_node: et.Element) -> str:
     """
     class_name = data_node.attrib['id']
     name = class_name.replace("class", "")
-    return name
+    reference_node  = data_node.find('includes')
+    reference = reference_node.attrib['refid']
+    return ClassInfo(name, reference)
 
 
 def get_implementation_file_name(doxygen_data_node: et.Element) -> str:
@@ -260,44 +297,6 @@ def get_tag_text(doxygen_node: et.Element) -> str:
 
     return tmp
 
-
-def parse_xml_text(doxygen_node: et.Element) -> str:
-    parts = []
-
-    if doxygen_node.tag in element_black_list_set:
-        return ""
-
-    if not doxygen_node.text is None:
-        parts.append(doxygen_node.text.strip())
-
-    for mixed_element_node in doxygen_node:
-        if mixed_element_node.tag in format_map:
-            markup = format_map[mixed_element_node.tag]
-            if not mixed_element_node.text is None:
-                content = markup.open + mixed_element_node.text.strip()
-            else:
-                content = markup.open
-            parts.append(content)
-            if len(mixed_element_node):
-                child_content = parse_xml_text(mixed_element_node)
-                parts[-1] = parts[-1] + child_content.strip()
-            parts[-1] = parts[-1] + markup.close
-        elif mixed_element_node.tag == "godotonly":
-            if mixed_element_node.get('position') == "close":
-                parts[-1] = parts[-1] + mixed_element_node.get("content") + mixed_element_node.tail.strip()
-            else:
-                parts.append(mixed_element_node.get("content") + mixed_element_node.tail.strip())
-
-        if not mixed_element_node.tail is None and not mixed_element_node.tail == " ":
-           if not mixed_element_node.tag == "godotonly":
-                parts.append(mixed_element_node.tail.strip())
-
-    text = " ".join(parts)
-    return text
-
-
-def do_something():
-    pass
 
 def load_godot_bindings(src_file: Path, class_name: str) -> None:
     """
@@ -364,6 +363,50 @@ def parse_class_xml_files() -> None:
         create_godot_doc(file)
 
 
+def parse_xml_text(doxygen_node: et.Element) -> str:
+    parts = []
+
+    if doxygen_node.tag in element_black_list_set:
+        return ""
+
+    if not doxygen_node.text is None:
+        parts.append(doxygen_node.text.strip())
+
+    for mixed_element_node in doxygen_node:
+        if mixed_element_node.tag in format_map:
+            markup = format_map[mixed_element_node.tag]
+            if not mixed_element_node.text is None:
+                content = markup.open + mixed_element_node.text.strip()
+            else:
+                content = markup.open
+            parts.append(content)
+            if len(mixed_element_node):
+                child_content = parse_xml_text(mixed_element_node)
+                parts[-1] = parts[-1] + child_content.strip()
+            parts[-1] = parts[-1] + markup.close
+        elif mixed_element_node.tag == "godotonly":
+            if mixed_element_node.get('position') == "close":
+                parts[-1] = parts[-1] + mixed_element_node.get("content") + mixed_element_node.tail.strip()
+            else:
+                parts.append(mixed_element_node.get("content") + mixed_element_node.tail.strip())
+
+        if not mixed_element_node.tail is None and not mixed_element_node.tail == " ":
+            if not mixed_element_node.tag == "godotonly":
+                parts.append(mixed_element_node.tail.strip())
+
+    text = " ".join(parts)
+    return text
+
+def preprocess_enumerator_constants(godot_root, xml_reference_file)->None:
+    tree = et.parse(xml_reference_file)
+    root = tree.getroot()
+    enum_nodes = root.findall(".//sectiondef[@kind='enum']")
+    for enumerator_node in enum_nodes[0]:
+        enumerator_name_node = enumerator_node.find('name')
+        value_name = enumerator_name_node.text
+        if value_name in bound_enums_set:
+            set_enumerator_data(godot_root, enumerator_node, value_name)
+
 def set_brief_description(godot_node: et.Element, data_node: et.Element) -> None:
     """
     Gets the brief description from the doxygen node's briefdescription tag
@@ -401,6 +444,42 @@ def set_detailed_description(godot_node: et.Element, data_node: et.Element) -> N
     text = get_tag_text(node)
     detailed = et.SubElement(godot_node, "description")
     detailed.text = text
+
+
+def set_detailed_description_as_text(godot_node: et.Element, data_node: et.Element) -> None:
+    """
+    Adds description tags to the Godot XML node after looking it up in the doxygen XML node
+    :param godot_node: The Godot XML node to add the description tag to
+    :param data_node: The doxygen node to search for the detaileddescription tag.
+    :return: None
+    """
+    node = data_node.find("detaileddescription")
+    text = get_tag_text(node)
+    godot_node.text = text
+
+
+def set_enumerator_data(godot_root: et.Element, enumerator_node: et.Element,value_name:str)->None:
+    constants_node = add_constants_node(godot_root)
+    index_value = 0
+
+    for enumerator_value_node in enumerator_node:
+        if enumerator_value_node.tag == "enumvalue":
+            enumerator_value_name_node = enumerator_value_node.find('name')
+            enumerator_value_name = enumerator_value_name_node.text
+            if enumerator_value_name in bound_enums_set[value_name]:
+                output_values = bound_enums_set[value_name][enumerator_value_name]
+                output_node = et.SubElement(constants_node, "constant")
+                output_node.set("name", output_values["qualified_name"])
+                output_node.set("enum", output_values["enumerator_name"])
+                initial_value_node = enumerator_value_node.find("initializer")
+                if initial_value_node is not None:
+                    text_content = initial_value_node.text
+                    value = text_content.split(" ")[1].strip()
+                    index_value = int(value)
+                output_node.set("value", str(index_value))
+                set_detailed_description_as_text(output_node, enumerator_value_node)
+                index_value += 1
+
 
 
 def set_member_data(godot_members_node: et.Element, doxygen_node: et.Element) -> None:
