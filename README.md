@@ -4,6 +4,15 @@ IMPORTANT
 Some output text may be missing or improperly formatted.
 Monday it will be fixed.
 
+Current Status:
+---------------
+Currently, the python script is capable of exporting the content for methods properties and enum constants.
+Processing of signals is in progress and should be finished soon, as well code blocks in description fields should be working
+in the next week or so.
+Here's what the current generated documentation appears like in the Godot editor:
+
+<img src="/git_content/output_screenshot.png" height="1%">
+
 Description:
 ------------
 Simple proof of concept for using cmake with a python script to generate godot docs from doxygen generated XML
