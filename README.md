@@ -1,19 +1,16 @@
 IMPORTANT
 ---------
-**Due to some changes today, output is not correct**.  
-Some output text may be missing or improperly formatted.
-Monday it will be fixed.
+If I broke something this is where it will be.  Currently, nothing to report.
 
 Current Status:
 ---------------
 Currently, the python script is capable of exporting the content for methods, properties, and enum constants.
 Processing of signals is in progress and should be finished soon, as well code blocks in description fields should be working
-in the next week or so.
+in the next week or so. 
 
-Obligatory screenshot of Output:
+[Obligatory Screenshot](#obligatory-screenshot)
 
-![Alt documentation_screenshot](/git_content/output_screenshot.png)
-
+The cmake build process now uses a build profile to speed compilation of the extension.
 
 Description:
 ------------
@@ -92,4 +89,7 @@ The Current Defined Aliases Are:
 | gdthe | Link to theme item           | 2          | @gdthe{class,name} | [theme_item class.name]  | name            |
 | gdpar | Parameter name as code       | 1          | @gdpar{name}       | [param name]             | name            |
 
+Obligatory Screenshot:
+----------------------
 
+![Alt documentation_screenshot](/git_content/output_screenshot.png)
