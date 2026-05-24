@@ -6,12 +6,14 @@ Monday it will be fixed.
 
 Current Status:
 ---------------
-Currently, the python script is capable of exporting the content for methods properties and enum constants.
+Currently, the python script is capable of exporting the content for methods, properties, and enum constants.
 Processing of signals is in progress and should be finished soon, as well code blocks in description fields should be working
 in the next week or so.
-Here's what the current generated documentation appears like in the Godot editor:
 
-![Alt documentation_screenshot](/git_content/output_screenshot.png){height=420}
+Obligatory screenshot of Output:
+
+![Alt documentation_screenshot](/git_content/output_screenshot.png)
+
 
 Description:
 ------------
@@ -62,6 +64,7 @@ Here's part of [TrafficLight.h](/src/traffic_light.h) showing the class linker `
 ```
 
 Generates this html:
+
 ![Alt htmlcontent](/git_content/html_output.png)
 
 But generates this class documentation:
@@ -69,8 +72,24 @@ But generates this class documentation:
 The class [u]must inherit[/u] from a Godot built in class (like [Object], [Node], [Sprite2D], or [Resource]). Godot does not support multiple inheritance for GDExtension classes.
 ```
 Which looks like this in the Godot editor:
+
 ![Alt doc_content](/git_content/editor_screen1.png)
 
-Using The Various Aliases:
---------------------------
-soon.....
+
+The Current Defined Aliases Are:
+--------------------------------
+
+| Alias | Action                       | Parameters | Example            | Godot Output             | Standard Output |
+|-------|------------------------------|------------|--------------------|--------------------------|-----------------|
+| glnk  | Link to class                | 1          | @gdlnk{class}      | [class]                  | class           |
+| gdcon | Link to constant             | 2          | @gdcon{class,name} | [constant class.name]    | name            |
+| gdenu | Link to enum                 | 2          | @gdenu{class,name} | [enum class.name]        | name            |
+| gdmem | Link to member               | 2          | @gdmem{class,name} | [member class.name]      | name            |
+| gdmet | Link to method               | 2          | @gdmet{class,name} | [method class.name]      | name            |
+| gdnew | Link to built-in constructor | 2          | @gdnew{class,name} | [constructor class.name] | name            |
+| gdope | Link to built-in operator    | 2          | @gdope{class,name} | [operator class.name *]  | name            |
+| gdsig | Link to signal               | 2          | @gdsig{class,name} | [signal class.name]      | name            |
+| gdthe | Link to theme item           | 2          | @gdthe{class,name} | [theme_item class.name]  | name            |
+| gdpar | Parameter name as code       | 1          | @gdpar{name}       | [param name]             | name            |
+
+

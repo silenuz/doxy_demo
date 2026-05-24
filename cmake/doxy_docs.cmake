@@ -26,6 +26,7 @@ if(DOXYGEN_FOUND)
     # help save repetitive typing
     Set(GODOT_LINK_START "<godotonly position=\\\"open\\\" content=\\\"[")
     set(GODOT_LINK_CLOSE "<godotonly position=\\\"close\\\" content=\\\"]\\\"></godotonly>")
+    set(GODOT_OPERATOR_LINK_CLOSE "<godotonly position=\\\"close\\\" content=\\\" *]\\\"></godotonly>")
 
     # create an alias so we can use @glnk{} or \glnk{} in comments to create output for Godot documentation only
     # so that doxygen xml output remains compatible with Breathe.
@@ -33,11 +34,12 @@ if(DOXYGEN_FOUND)
             ## define aliases for various godot documentation only links see https://docs.godotengine.org/en/stable/engine_details/class_reference/index.html#linking
             "glnk{1}=\"\\xmlonly${GODOT_LINK_START}\\\"></godotonly>\\endxmlonly\\1\\xmlonly${GODOT_LINK_CLOSE}\\endxmlonly\""
             "gdcon{2}=\"\\xmlonly${GODOT_LINK_START}constant \\1.\\\"></godotonly>\\endxmlonly\\2\\xmlonly${GODOT_LINK_CLOSE}\\endxmlonly\""
+            "gdcon{2}=\"\\xmlonly${GODOT_LINK_START}constant \\1.\\\"></godotonly>\\endxmlonly\\2\\xmlonly${GODOT_LINK_CLOSE}\\endxmlonly\""
             "gdenu{2}=\"\\xmlonly${GODOT_LINK_START}enum \\1.\\\"></godotonly>\\endxmlonly\\2\\xmlonly${GODOT_LINK_CLOSE}\\endxmlonly\""
             "gdmem{2}=\"\\xmlonly${GODOT_LINK_START}member \\1.\\\"></godotonly>\\endxmlonly\\2\\xmlonly${GODOT_LINK_CLOSE}\\endxmlonly\""
             "gdmet{2}=\"\\xmlonly${GODOT_LINK_START}method \\1.\\\"></godotonly>\\endxmlonly\\2\\xmlonly${GODOT_LINK_CLOSE}\\endxmlonly\""
-            "gdcon{2}=\"\\xmlonly${GODOT_LINK_START}constructor \\1.\\\"></godotonly>\\endxmlonly\\2\\xmlonly${GODOT_LINK_CLOSE}\\endxmlonly\""
-            "gdope{2}=\"\\xmlonly${GODOT_LINK_START}operator \\1.\\\"></godotonly>\\endxmlonly\\2\\xmlonly${GODOT_LINK_CLOSE}\\endxmlonly\""
+            "gdnew{2}=\"\\xmlonly${GODOT_LINK_START}constructor \\1.\\\"></godotonly>\\endxmlonly\\2\\xmlonly${GODOT_LINK_CLOSE}\\endxmlonly\""
+            "gdope{2}=\"\\xmlonly${GODOT_LINK_START}operator \\1.\\\"></godotonly>\\endxmlonly\\2\\xmlonly${GODOT_OPERATOR_LINK_CLOSE}\\endxmlonly\""
             "gdsig{2}=\"\\xmlonly${GODOT_LINK_START}signal \\1.\\\"></godotonly>\\endxmlonly\\2\\xmlonly${GODOT_LINK_CLOSE}\\endxmlonly\""
             "gdthe{2}=\"\\xmlonly${GODOT_LINK_START}theme_item \\1.\\\"></godotonly>\\endxmlonly\\2\\xmlonly${GODOT_LINK_CLOSE}\\endxmlonly\""
             "gdpar{1}=\"\\xmlonly${GODOT_LINK_START}param\\\"></godotonly>\\endxmlonly\\1\\xmlonly${GODOT_LINK_CLOSE}\\endxmlonly\""
