@@ -76,18 +76,18 @@ Which looks like this in the Godot editor:
 The Current Defined Aliases Are:
 --------------------------------
 
-| Alias | Action                       | Parameters | Example            | Godot Output             | Standard Output |
-|-------|------------------------------|------------|--------------------|--------------------------|-----------------|
-| gdlnk | Link to class                | 1          | @gdlnk{class}      | [class]                  | class           |
-| gdcon | Link to constant             | 2          | @gdcon{class,name} | [constant class.name]    | name            |
-| gdenu | Link to enum                 | 2          | @gdenu{class,name} | [enum class.name]        | name            |
-| gdmem | Link to member               | 2          | @gdmem{class,name} | [member class.name]      | name            |
-| gdmet | Link to method               | 2          | @gdmet{class,name} | [method class.name]      | name            |
-| gdnew | Link to built-in constructor | 2          | @gdnew{class,name} | [constructor class.name] | name            |
-| gdope | Link to built-in operator    | 2          | @gdope{class,name} | [operator class.name *]  | name            |
-| gdsig | Link to signal               | 2          | @gdsig{class,name} | [signal class.name]      | name            |
-| gdthe | Link to theme item           | 2          | @gdthe{class,name} | [theme_item class.name]  | name            |
-| gdpar | Parameter name as code       | 1          | @gdpar{name}       | [param name]             | name            |
+| Alias  | Action                       | Parameters | Example            | Godot Output             | Standard Output |
+|--------|------------------------------|------------|--------------------|--------------------------|-----------------|
+| glnk   | Link to class                | 1          | @glnk{class}       | [class]                  | class           |
+| gdcon  | Link to constant             | 2          | @gdcon{class,name} | [constant class.name]    | name            |
+| gdenu  | Link to enum                 | 2          | @gdenu{class,name} | [enum class.name]        | name            |
+| gdmem  | Link to member               | 2          | @gdmem{class,name} | [member class.name]      | name            |
+| gdmet  | Link to method               | 2          | @gdmet{class,name} | [method class.name]      | name            |
+| gdnew  | Link to built-in constructor | 2          | @gdnew{class,name} | [constructor class.name] | name            |
+| gdope  | Link to built-in operator    | 2          | @gdope{class,name} | [operator class.name *]  | name            |
+| gdsig  | Link to signal               | 2          | @gdsig{class,name} | [signal class.name]      | name            |
+| gdthe  | Link to theme item           | 2          | @gdthe{class,name} | [theme_item class.name]  | name            |
+| gdpar  | Parameter name as code       | 1          | @gdpar{name}       | [param name]             | name            |
 
 Obligatory Screenshot:
 ----------------------
