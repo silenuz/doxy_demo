@@ -12,11 +12,15 @@ void Summator::_bind_methods()
     ClassDB::bind_method(D_METHOD("add","value"),&Summator::add);
     ClassDB::bind_method(D_METHOD("reset"),&Summator::reset);
     ClassDB::bind_method(D_METHOD("get_total"),&Summator::get_total);
+
+	ADD_SIGNAL(MethodInfo("sum_changed", PropertyInfo(Variant::INT, "sum")));
+
 }
 
 void Summator::add(int p_value)
 {
     sum += p_value;
+	emit_signal("sum_changed",sum);
 }
 void Summator::reset()
 {
