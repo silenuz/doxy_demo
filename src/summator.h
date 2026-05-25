@@ -30,6 +30,13 @@ using namespace godot;
  *	print(total)
  * \endcode
  *
+ * \xmlonly
+ * <signals>
+ *		<sum_changed>
+ *			This signal is emitted when the sum value changes
+ *		</sum_changed>
+ * </signals>
+ * \endxmlonly
  */
 class Summator : public Object
 {

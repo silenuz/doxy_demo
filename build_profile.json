@@ -1,11 +1,12 @@
 {
-	"_": "This is an example build profile and not used by default. See the SConstruct file for more information.",
+	"_": "Build Profile Generated from Doxygen XML",
 	"type": "feature_profile",
 	"enabled_classes": [
+		"OS",
 		"Object",
 		"Control",
-		"OS",
 		"Texture2D",
 		"TextureRect"
+
 	]
 }

@@ -8,7 +8,7 @@ if(DOXYGEN_FOUND)
     # set project settings
     set(DOXYGEN_PROJECT_NAME ${LIBNAME})
     set(DOXYGEN_PROJECT_NUMBER ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR})
-
+    option(GENERATE_BUILD_PROFILE "Generate a build_profile.json file from the doxygen XML" NO)
     # Optional: Set the path to your logo file
     #set(DOXYGEN_PROJECT_LOGO "${CMAKE_CURRENT_SOURCE_DIR}/logo.png")
     # Optional: Set a favicon (requires Doxygen 1.10.0+)
@@ -100,4 +100,16 @@ if(DOXYGEN_FOUND)
             VERBATIM
     )
 
+    if(GENERATE_BUILD_PROFILE)
+        # call python script to convert doxygen xml to Godot class documentation xml
+        add_custom_command(
+                TARGET doc_doxygen
+                POST_BUILD
+                COMMAND Python3::Interpreter "${CMAKE_CURRENT_SOURCE_DIR}/cmake/doxy_build_profile.py"
+                "${DOXYGEN_OUTPUT_DIRECTORY}/xml"
+                "${CMAKE_CURRENT_SOURCE_DIR}/doc_classes"
+                COMMENT "Generating Build Profile"
+                VERBATIM
+        )
+    endif ()
 endif()
