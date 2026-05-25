@@ -101,7 +101,7 @@ if(DOXYGEN_FOUND)
     )
 
     if(GENERATE_BUILD_PROFILE)
-        # call python script to convert doxygen xml to Godot class documentation xml
+        # call python script to generate a build_profile json file from the doxygen xml
         add_custom_command(
                 TARGET doc_doxygen
                 POST_BUILD
