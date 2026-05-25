@@ -2,8 +2,8 @@ IMPORTANT
 ---------
 If I broke something this is where it will be.  Currently, nothing to report.
 
-Current Status:
----------------
+Current Status: ALPHA (if that)
+-------------------------------
 Currently, the python script is capable of exporting the content for methods, properties, and enum constants.
 Processing of signals is in progress and should be finished soon, as well code blocks in description fields should be working
 in the next week or so. 
@@ -78,7 +78,7 @@ The Current Defined Aliases Are:
 
 | Alias | Action                       | Parameters | Example            | Godot Output             | Standard Output |
 |-------|------------------------------|------------|--------------------|--------------------------|-----------------|
-| glnk  | Link to class                | 1          | @gdlnk{class}      | [class]                  | class           |
+| gdlnk | Link to class                | 1          | @gdlnk{class}      | [class]                  | class           |
 | gdcon | Link to constant             | 2          | @gdcon{class,name} | [constant class.name]    | name            |
 | gdenu | Link to enum                 | 2          | @gdenu{class,name} | [enum class.name]        | name            |
 | gdmem | Link to member               | 2          | @gdmem{class,name} | [member class.name]      | name            |
