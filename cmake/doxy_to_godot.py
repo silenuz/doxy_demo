@@ -19,6 +19,7 @@ xml_input_folder = sys.argv[1]
 dest_folder = sys.argv[2]
 src_folder = Path(dest_folder).parent
 
+
 template_methods_path = next(src_folder.rglob("methods.py"))
 module_name = "template_methods"
 template_methods_found = False
@@ -74,7 +75,15 @@ format_map["underline"] = bbc_underline
 
 ClassInfo = namedtuple("ClassInfo", ["class_name", "reference"])
 
+MESSAGE_TYPE_WARNING = 0
+MESSAGE_TYPE_ERROR = 1
+
 def add_constants_node(godot_root: et.Element)->et.Element:
+    """
+    Get the constants element from the Godot output XML, if it doesn't exist it create one
+    :param godot_root: The Godot root element of the output XML
+    :return: The constants element from the Godot output XML
+    """
     constants_node = godot_root.find("constants")
     if not constants_node is None:
         return constants_node
@@ -96,10 +105,7 @@ def catalog_bindings(doxygen_data_node: et.Element, class_name: str) -> bool:
     # clear_tracked_bindings()
     code_file_name = get_implementation_file_name(doxygen_data_node)
     if code_file_name is None:
-        if template_methods_found:
-            methods_module.print_warning("Unable to determine code implementation file for " + class_name)
-        else:
-            print("Unable to determine code implementation file for " + class_name)
+        print_message("Unable to determine code implementation file for " + class_name,MESSAGE_TYPE_WARNING)
         return False
     else:
         project_src = src_folder
@@ -108,10 +114,7 @@ def catalog_bindings(doxygen_data_node: et.Element, class_name: str) -> bool:
             load_godot_bindings(code_file, class_name)
             return True
         else:
-            if template_methods_found:
-                methods_module.print_error("Code Implementation File not found " + code_file_name)
-            else:
-                print("Code Implementation File not found " + code_file_name)
+            print_message("Code Implementation File not found " + code_file_name,MESSAGE_TYPE_ERROR)
             return False
 
 
@@ -127,6 +130,11 @@ def clear_tracked_bindings() -> None:
 
 
 def create_bound_enums(bind_method_code: str) -> None:
+    """
+    Creates the nested dictionary to track enumerator values and the enumerator they belong to.
+    :param bind_method_code: The code content of the _bind_methods function
+    :return: None
+    """
     bound_enum_pattern = r"(?<=BIND_ENUM_CONSTANT)\((.*?)\)"
     bound_enum_matches = re.findall(bound_enum_pattern, bind_method_code)
     for bound_enum_match in bound_enum_matches:
@@ -162,7 +170,14 @@ def create_bound_methods(bind_methods_code: str) -> None:
                 bound_methods_set.add(qualified_name)
 
 
-def create_enumator_data(godot_root, reference)->None:
+def create_enumator_data(godot_root: et.Element, reference: str)->None:
+    """
+    Loads the reference file for the Doxygen class XML that is being parsed, if found, then
+    the reference file and the Godot XML root element are passed to the enumerator constants preprocessor.
+    :param godot_root: The root element of the Godot XML output
+    :param reference: The reference file name that was parsed when the Doxygen class XML was first loaded.
+    :return: None
+    """
     if len(bound_enums_set) < 1:
         return
     file_name = reference + ".xml"
@@ -170,10 +185,7 @@ def create_enumator_data(godot_root, reference)->None:
     if xml_reference_file:
         preprocess_enumerator_constants(godot_root, xml_reference_file)
     else:
-        if template_methods_found:
-            methods_module.print_error("Unable to generate enumerator constants, file not found ", file_name)
-        else:
-            print("Unable to generate enumerator constants, file not found ", file_name)
+        print_message("Unable to generate enumerator constants, file not found " + file_name, MESSAGE_TYPE_ERROR)
 
 
 def create_godot_doc(file: Path) -> None:
@@ -314,7 +326,7 @@ def load_godot_bindings(src_file: Path, class_name: str) -> None:
         bind_method_content = bind_methods_match.group(0)
         map_godot_bindings(bind_method_content)
     else:
-        print(f"_bind_methods function not found in {src_file}")
+        print_message("_bind_methods function not found in " + src_file,MESSAGE_TYPE_WARNING)
 
 
 def map_godot_bindings(bind_method_code: str) -> None:
@@ -332,7 +344,7 @@ def map_godot_bindings(bind_method_code: str) -> None:
         create_bound_methods(bound_methods_match.group(1))
         create_bound_enums(bound_methods_match.group(1))
     else:
-        print(f"Unknown error could not get content of _bind_methods function")
+        print_message("Unknown error could not get content of _bind_methods function", MESSAGE_TYPE_ERROR)
 
 
 def map_property_bindings(bind_methods_code: str) -> None:
@@ -397,7 +409,16 @@ def parse_xml_text(doxygen_node: et.Element) -> str:
     text = " ".join(parts)
     return text
 
-def preprocess_enumerator_constants(godot_root, xml_reference_file)->None:
+
+def preprocess_enumerator_constants(godot_root: et.Element, xml_reference_file: Path)->None:
+    """
+    Finds the enumerator section in the reference file, once found it loops through each enumerator
+    checking to see if the enumerator is bound, if so it calls set_enumerator_data which will add the
+    bound enum values to the Godot output XML
+    :param godot_root: The root element of the Godot output XML
+    :param xml_reference_file: the reference file path for the Doxygen output
+    :return: None
+    """
     tree = et.parse(xml_reference_file)
     root = tree.getroot()
     enum_nodes = root.findall(".//sectiondef[@kind='enum']")
@@ -406,6 +427,26 @@ def preprocess_enumerator_constants(godot_root, xml_reference_file)->None:
         value_name = enumerator_name_node.text
         if value_name in bound_enums_set:
             set_enumerator_data(godot_root, enumerator_node, value_name)
+
+
+def print_message(message:str,message_type: int)->None:
+    """
+    Prints output messages, if methods.py from the cpp template is found it uses the color printing from that
+    module.
+    :param message: The message to print
+    :param message_type: The type of message, warning or error
+    :return: None
+    """
+    if template_methods_found:
+        if message_type == MESSAGE_TYPE_ERROR:
+            methods_module.print_error(message)
+        elif message_type == MESSAGE_TYPE_WARNING:
+            methods_module.print_warning(message)
+        else:
+            print(message)
+    else:
+        print(message)
+
 
 def set_brief_description(godot_node: et.Element, data_node: et.Element) -> None:
     """
@@ -458,16 +499,25 @@ def set_detailed_description_as_text(godot_node: et.Element, data_node: et.Eleme
     godot_node.text = text
 
 
-def set_enumerator_data(godot_root: et.Element, enumerator_node: et.Element,value_name:str)->None:
+def set_enumerator_data(godot_root: et.Element, enumerator_node: et.Element, enumerator_name:str)->None:
+    """
+    Loops through the elements in the Doxygen enumerator element to find the enumerator values.  For each enumerator value it
+    checks if it is bound, if it is it is output to the constants node of the Godot output XML
+    :param godot_root: The root element of the Godot XML output
+    :param enumerator_node: The enumerator element from the Doxygen XML reference file
+    :param enumerator_name: The name of the enumerator
+    :return: None
+    """
     constants_node = add_constants_node(godot_root)
+    # track index, Godot will pick up the values after the last initialized value based on index.
     index_value = 0
 
     for enumerator_value_node in enumerator_node:
         if enumerator_value_node.tag == "enumvalue":
             enumerator_value_name_node = enumerator_value_node.find('name')
             enumerator_value_name = enumerator_value_name_node.text
-            if enumerator_value_name in bound_enums_set[value_name]:
-                output_values = bound_enums_set[value_name][enumerator_value_name]
+            if enumerator_value_name in bound_enums_set[enumerator_name]:
+                output_values = bound_enums_set[enumerator_name][enumerator_value_name]
                 output_node = et.SubElement(constants_node, "constant")
                 output_node.set("name", output_values["qualified_name"])
                 output_node.set("enum", output_values["enumerator_name"])
@@ -565,10 +615,10 @@ def write_file(godot_root: et.Element, class_name: str) -> bool:
         result = True
     except(OSError, IOError) as e:
         # Catches issues like permission denied or invalid paths
-        print(f"File system error: {e}")
+        print_message(f"File system error: {e}",MESSAGE_TYPE_ERROR)
     except Exception as e:
         # Catches other potential issues (e.g., non-serializable data)
-        print(f"An unexpected error occurred: {e}")
+        print_message(f"An unexpected error occurred: {e}",MESSAGE_TYPE_ERROR)
 
     return result
 
