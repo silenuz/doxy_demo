@@ -57,7 +57,8 @@ def parse_reference_file(reference):
                 class_name = "".join(word.capitalize() for word in include_file_name.split("_"))
                 # handle the fact that 2d or 3d in file name becomes 2D or 3D in Class name
                 actual_class_name =  re.sub(r'(?<=\d)(d|D)', lambda match: match.group(0).upper(), class_name)
-                build_profile['enabled_classes'].append(actual_class_name)
+                if actual_class_name not in build_profile['enabled_classes']:
+                    build_profile['enabled_classes'].append(actual_class_name)
     else:
         print("file not found " + file_name)
 
