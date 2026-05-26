@@ -30,13 +30,15 @@ using namespace godot;
  *	print(total)
  * \endcode
  *
- * \xmlonly
- * <signals>
- *		<sum_changed>
- *			This signal is emitted when the sum value changes
- *		</sum_changed>
- * </signals>
- * \endxmlonly
+ *
+ * @signal{sum_changed(int: sum)| This **signal**, is _emitted_ when the sum changes whether
+ * after adding a new integer or when resetting the total back to zero.
+ *
+ * Note: An item of interest goes here.
+ *
+ * Warning: The person who added the signal forgot to add the emit signal to the reset function, and therefore it
+ * fails when the total is reset.}
+ *
  */
 class Summator : public Object
 {
