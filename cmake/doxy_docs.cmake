@@ -43,6 +43,8 @@ if(DOXYGEN_FOUND)
             "gdsig{2}=\"\\xmlonly${GODOT_LINK_START}signal \\1.\\\"></godotonly>\\endxmlonly\\2\\xmlonly${GODOT_LINK_CLOSE}\\endxmlonly\""
             "gdthe{2}=\"\\xmlonly${GODOT_LINK_START}theme_item \\1.\\\"></godotonly>\\endxmlonly\\2\\xmlonly${GODOT_LINK_CLOSE}\\endxmlonly\""
             "gdpar{1}=\"\\xmlonly${GODOT_LINK_START}param\\\"></godotonly>\\endxmlonly\\1\\xmlonly${GODOT_LINK_CLOSE}\\endxmlonly\""
+            "signalindent=\"\\htmlonly&nbsp\;&nbsp\;&nbsp\;&nbsp\;&nbsp\;&nbsp\;&nbsp\;&nbsp\;&nbsp\;&nbsp\;&nbsp;\\endhtmlonly\""
+            "signal{2|}=\"\\xrefitem signal \\\"Signals\\\" \\\"Signals\\\"\\xmlonly<godotonly reference=\\\"signal\\\" name=\\\"\\1\\\"/>\\endxmlonly@parblock<b>\\1:</b>^^^^^^\\signalindent\\2@endparblock\""
     )
 
    set(DOXYGEN_VERBATIM_VARS DOXYGEN_ALIASES)
