@@ -14,7 +14,7 @@ void Summator::_bind_methods()
     ClassDB::bind_method(D_METHOD("get_total"),&Summator::get_total);
 
 	ADD_SIGNAL(MethodInfo("sum_changed", PropertyInfo(Variant::INT, "sum")));
-
+	ADD_SIGNAL(MethodInfo("sum_reset"));
 }
 
 void Summator::add(int p_value)
@@ -25,6 +25,8 @@ void Summator::add(int p_value)
 void Summator::reset()
 {
     sum = 0;
+	emit_signal("sum_changed",sum);
+	emit_signal("sum_reset");
 }
 int Summator::get_total() const
 {

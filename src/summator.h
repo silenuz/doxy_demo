@@ -31,14 +31,17 @@ using namespace godot;
  * \endcode
  *
  *
- * @signal{sum_changed(int: sum)| This **signal**, is _emitted_ when the sum changes whether
+ * @signal{sum_changed(int: sum)|
+ * This **signal**, is _emitted_ when the sum changes whether
  * after adding a new integer or when resetting the total back to zero.
+ * @note Missing emit signal in total reset has been recently fixed
  *
- * Note: An item of interest goes here.
+ * @signal{sum_reset()| This signal is emitted when the total is reset to zero
+ * @note this signal is highly redundant and was added so there would be a warning to parse
+ * @warning I'm making this up as I go along! }
  *
- * Warning: The person who added the signal forgot to add the emit signal to the reset function, and therefore it
- * fails when the total is reset.}
- *
+ * @signal{doesnt_exist|This is just a plain description, no warning or note for parser testing.  This signal
+ * doesn't actually exist, so don't try to use it.}
  */
 class Summator : public Object
 {
