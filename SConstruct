@@ -62,3 +62,7 @@ copy = env.Install("{}/bin/{}/".format(projectdir, env["platform"]), library)
 
 default_args = [library, copy]
 Default(*default_args)
+
+# build documentation
+env = Environment(tools=["default", "cmake.doxygen"], toolpath=".")
+env.Doxygen("cmake/scons_doxy.cfg")
