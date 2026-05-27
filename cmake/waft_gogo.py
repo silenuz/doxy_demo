@@ -16,6 +16,7 @@ import re
 from collections import namedtuple
 from pathlib import Path
 from xml.etree import ElementTree as et
+import luckys_zephyr as lz
 
 xml_input_folder = sys.argv[1]
 dest_folder = sys.argv[2]
@@ -26,22 +27,6 @@ build_profile['_'] = 'Build Profile Generated from Doxygen XML'
 build_profile['type'] = 'feature_profile'
 build_profile['enabled_classes'] = []
 build_profile['enabled_classes'].append("OS")
-
-ClassInfo = namedtuple("ClassInfo", ["class_name", "reference"])
-
-def get_class_name(data_node: et.Element) -> ClassInfo:
-    # todo: update docstring for new method signature
-    """
-    Gets the class name from the doxygen node's id attribute
-    :param data_node: The doxygen XML node containing the class data
-    :return: a string containing the class name
-    """
-    class_name = data_node.attrib['id']
-    name = class_name.replace("class", "")
-    reference_node  = data_node.find('includes')
-    reference = reference_node.attrib['refid']
-    return ClassInfo(name, reference)
-
 
 def parse_reference_file(reference):
     file_name = reference + ".xml"
@@ -64,18 +49,14 @@ def parse_reference_file(reference):
 
 
 def create_profile_for_class(file):
-    tree = et.parse(file)
-    root = tree.getroot()
-    data_node = root[0]
-    class_info = get_class_name(data_node)
+    class_data = lz.create_profile_for_class(file)
+    class_info = class_data[1]
     parse_reference_file(class_info.reference)
-
 
 def write_output():
     file_name = src_folder / 'build_profile_gen.json'
     with open(file_name, 'w') as f:
         json.dump(build_profile, f,indent=4)
-
 
 def parse_class_xml_files() -> None:
     """
@@ -87,6 +68,5 @@ def parse_class_xml_files() -> None:
     for file in files:
         create_profile_for_class(file)
         write_output()
-
 
 parse_class_xml_files()

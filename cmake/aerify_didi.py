@@ -14,6 +14,7 @@ from collections import namedtuple
 import sys
 from pathlib import Path
 from xml.etree import ElementTree as et
+import luckys_zephyr as lz
 
 xml_input_folder = sys.argv[1]
 dest_folder = sys.argv[2]
@@ -72,8 +73,6 @@ format_map["bold"] = bbc_bold
 format_map["emphasis"] = bbc_italic
 format_map["strike"] = bbc_strikethrough
 format_map["underline"] = bbc_underline
-
-ClassInfo = namedtuple("ClassInfo", ["class_name", "reference"])
 
 MESSAGE_TYPE_WARNING = 0
 MESSAGE_TYPE_ERROR = 1
@@ -194,10 +193,9 @@ def create_godot_doc(file: Path) -> None:
     :param file: the path to the doxygen XML file that is to be parsed
     :return: None
     """
-    tree = et.parse(file)
-    root = tree.getroot()
-    data_node = root[0]
-    class_info = get_class_name(data_node)
+    class_data = lz.create_profile_for_class(file)
+    data_node = class_data[0]
+    class_info = class_data[1]
     if catalog_bindings(data_node, class_info.class_name):
         godot_root = et.Element('class')
         godot_root.set('name', class_info.class_name)
@@ -237,7 +235,7 @@ def create_method_data(godot_root: et.Element, data_node: et.Element) -> None:
     # todo: add handling of protected functions
 
 
-def get_class_name(data_node: et.Element) -> ClassInfo:
+def get_class_name(data_node: et.Element) -> lz.ClassInfo:
     # todo: update docstring for new method signature
     """
     Gets the class name from the doxygen node's id attribute
@@ -248,7 +246,7 @@ def get_class_name(data_node: et.Element) -> ClassInfo:
     name = class_name.replace("class", "")
     reference_node  = data_node.find('includes')
     reference = reference_node.attrib['refid']
-    return ClassInfo(name, reference)
+    return lz.ClassInfo(name, reference)
 
 
 def get_implementation_file_name(doxygen_data_node: et.Element) -> str:
