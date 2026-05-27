@@ -5,6 +5,15 @@ if(DOXYGEN_FOUND)
     ###                                     Configure                                        ###
     ############################################################################################
 
+    # set the name of the directory that contains the python scripts
+    set(ZEPHYR_DIRECTORY "cmake")
+
+    # set the output directory for the generated Godot class documentation
+    set(GODOT_GENERATED_DOCS_DIRECTORY  "${CMAKE_CURRENT_SOURCE_DIR}/doc_classes_generated")
+
+    # set directory to create the doxygen docs in
+    set(DOXYGEN_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/doxygen")
+
     # set project settings
     set(DOXYGEN_PROJECT_NAME ${LIBNAME})
     set(DOXYGEN_PROJECT_NUMBER ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR})
@@ -47,10 +56,7 @@ if(DOXYGEN_FOUND)
             "signal{2|}=\"\\xrefitem signal \\\"Signal\\\" \\\"Signals\\\"\\xmlonly<godotonly reference=\\\"signal\\\" name=\\\"\\1\\\"/>\\endxmlonly@parblock<b>\\1:</b> ^^^^^^ \\2@endparblock\""
     )
 
-   set(DOXYGEN_VERBATIM_VARS DOXYGEN_ALIASES)
-
-    # set directory to create the docs in
-    set(DOXYGEN_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/docs)
+    set(DOXYGEN_VERBATIM_VARS DOXYGEN_ALIASES)
 
     # set the project read me file as the content of the main index page of
     # the documentation
@@ -95,9 +101,9 @@ if(DOXYGEN_FOUND)
     add_custom_command(
             TARGET doc_doxygen
             POST_BUILD
-            COMMAND Python3::Interpreter "${CMAKE_CURRENT_SOURCE_DIR}/cmake/doxy_to_godot.py"
+            COMMAND Python3::Interpreter "${CMAKE_CURRENT_SOURCE_DIR}/${ZEPHYR_DIRECTORY}/doxy_to_godot.py"
             "${DOXYGEN_OUTPUT_DIRECTORY}/xml"
-            "${CMAKE_CURRENT_SOURCE_DIR}/doc_classes"
+            "${GODOT_GENERATED_DOCS_DIRECTORY}"
             COMMENT "Generating Godot class documentation"
             VERBATIM
     )
@@ -107,11 +113,13 @@ if(DOXYGEN_FOUND)
         add_custom_command(
                 TARGET doc_doxygen
                 POST_BUILD
-                COMMAND Python3::Interpreter "${CMAKE_CURRENT_SOURCE_DIR}/cmake/doxy_build_profile.py"
+                COMMAND Python3::Interpreter "${CMAKE_CURRENT_SOURCE_DIR}/${ZEPHYR_DIRECTORY}/doxy_build_profile.py"
                 "${DOXYGEN_OUTPUT_DIRECTORY}/xml"
                 "${CMAKE_CURRENT_SOURCE_DIR}/doc_classes"
                 COMMENT "Generating Build Profile"
                 VERBATIM
         )
     endif ()
+else()
+    message(STATUS "Doxygen Not Found")
 endif()

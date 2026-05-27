@@ -38,7 +38,7 @@ using namespace godot;
  *
  * @signal{sum_reset()| This signal is emitted when the total is reset to zero
  * @note this signal is highly redundant and was added so there would be a warning to parse
- * @warning I'm making this up as I go along!}
+ * @gdwarn{I'm making this up as I go along}}
  *
  * @signal{doesnt_exist|This is just a plain description, no warning or note for parser testing.  This signal
  * doesn't actually exist, so don't try to use it.  This should only output to html as the signal is not actually registered

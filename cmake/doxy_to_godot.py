@@ -610,6 +610,8 @@ def write_file(godot_root: et.Element, class_name: str) -> bool:
     tree = et.ElementTree(godot_root)
     file_name = dest_folder + "/" + class_name + ".xml"
 
+    Path(dest_folder).mkdir(parents=True, exist_ok=True)
+
     try:
         tree.write(file_name, encoding="utf-8", xml_declaration=True, short_empty_elements=False)
         result = True
