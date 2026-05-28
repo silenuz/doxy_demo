@@ -1,8 +1,11 @@
 IMPORTANT
 ---------
-The most recent version of the python scripts can be found [here](https://github.com/silenuz/poozos_albatross)
+The most recent version of the python scripts can be found [here](https://github.com/silenuz/poozos_albatross).
+
 It includes the python scripts and a self-contained example to demonstrate usage from the command line, 
-and neither requires Doxygen nor any build system.
+and neither requires Doxygen nor any build system. 
+
+The scripts will only be updated here once week
 
 If I broke something this is where it will be.  Currently, nothing to report.
 
