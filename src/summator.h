@@ -34,6 +34,7 @@ using namespace godot;
  * @signal{sum_changed(int: sum)|
  * This **signal**, is _emitted_ when the sum changes whether
  * after adding a new integer or when resetting the total back to zero.
+ *
  * @note “You're on Earth. There's no cure for that.” ― Samuel Beckett  }
  *
  * @signal{sum_reset()| This signal is emitted when the total is reset to zero

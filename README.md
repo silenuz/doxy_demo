@@ -11,9 +11,9 @@ If I broke something this is where it will be.  Currently, nothing to report.
 
 Current Status: ALPHA (if that)
 -------------------------------
-Currently, the python script is capable of exporting the content for methods, properties, and enum constants.
-Processing of signals is in progress and should be finished soon, as well code blocks in description fields should be working
-in the next week or so. 
+Currently, the python script is capable of exporting the content for methods, properties, enum constants and signals.
+
+Processing of code blocks is in progress and should be finished soon along with constants. 
 
 [Obligatory Screenshot](#obligatory-screenshot)
 
@@ -62,6 +62,48 @@ see the documentation for that class.
 
 Notes:
 ------
+Signal information is now output to the class documentation and the Doxygen XML parser expects the information to be part of the
+detailed description for the class.  If it can find signal reference items in the class' detailed description, it will output 
+those descriptions, otherwise it will simply generate the signal content with an empty description much the same as doctool would.
+
+Unlike properties which have a backing field to parse content for, signals don't necessarily have a physical presence in the file,
+so to provide the information to Doxygen the signal alias is used.  It takes two arguments, the name of the signal, and the description.
+Unlike the other aliases the signal alias uses a pipe as the argument seperator so that commas in the description do not have to
+escaped.  
+
+The name can be the full signature ```sum_changed(int: sum)``` or just the name ```sum_changed```.  The name
+here is what shows up in the other output formats, so if your generating html or other formats for in-house documentation
+using the full signature is recommended.  
+
+The description contains the description and any notes and or warnings using the standard @note and @warning Doxygen commands.
+Currently, there is a bug in the xml parser where it will only read 1 paragraph for the description.  So only the first paragraph of the 
+second argument will be read into the description, however it is fine to have a paragraph break between the description and any note or warning.
+
+Sample:
+
+```c++
+ * @signal{sum_changed(int: sum)|
+ * This **signal**, is _emitted_ when the sum changes whether
+ * after adding a new integer or when resetting the total back to zero.
+ *
+ * @note “You're on Earth. There's no cure for that.” ― Samuel Beckett  }
+ *
+ * @signal{sum_reset()| This signal is emitted when the total is reset to zero
+ * @note Gogo: 'We always find something, eh Didi, to give us the impression we exist?"
+ * @warning I'm making this up as I go along }
+ *
+ * @signal{doesnt_exist|This is just a plain description, no warning or note for parser testing.  This signal
+ * doesn't actually exist, so don't try to use it.  This should only output to html as the signal is not actually registered
+ * with ClassDB.}
+```
+Editor Signal Output:
+
+![Alt signal_output_godot](git_content/signals_godot.png)
+
+Html Signal Output:
+
+![Alt signal_output_html](git_content/signals_html.png)
+
 There are multiple predefined aliases for Doxygen in the [doxy_docs.cmake](/cmake/doxy_docs.cmake) file.  These aliases 
 can be used to insert Godot specific elements into the Doxygen XML output that will be ignored by other document 
 generators like Breathe that work with the Doxygen XML output.  This output is also ignored when producing html, latex, 
