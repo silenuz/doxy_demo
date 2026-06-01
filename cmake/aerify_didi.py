@@ -2,17 +2,26 @@
 # -*- coding: utf-8 -*-
 
 """
-@Project: doxy-to-godot
-@Date: 5/13/26
-@File: doxy_to_godot
+@Project: poozos_albatross
+@Date: 5/27/26
+@File: aerify_didi
 
-@Author: Silenuz Nowan (silenuznowan@Yahoo.com)
+@Author: Silenuz Nowan (silenuznowan@yahoo.com)
+
+This module parses Doxygen XML output to generate Godot class documentation for a GDExtension.
+
+Command-line Arguments:
+
+Didi: "Well? What do we do?"
+Gogo: "Don't let's do anything.  It's safer"
 """
+import copy
 import re
 import importlib.util
 from collections import namedtuple
 import sys
 from pathlib import Path
+from pickle import GLOBAL
 from xml.etree import ElementTree as et
 import luckys_zephyr as lz
 
@@ -20,8 +29,7 @@ xml_input_folder = sys.argv[1]
 dest_folder = sys.argv[2]
 src_folder = Path(dest_folder).parent
 
-
-template_methods_path = next(src_folder.rglob("methods.py"))
+template_methods_path = next(src_folder.rglob("methods.py"), None)
 module_name = "template_methods"
 template_methods_found = False
 methods_module = None
@@ -53,9 +61,13 @@ element_black_list_set = set()
 element_black_list_set.add("htmlonly")
 element_black_list_set.add("manonly")
 element_black_list_set.add("latexonly")
+element_black_list_set.add("xrefsect")
+element_black_list_set.add("programlisting")
 
 # track property definitions
 bound_properties = dict()
+
+bound_signals = dict()
 
 # track opening and closing markup for bbcode to translate html markup in element text attibutes
 BBCodeMap = namedtuple("BBCodeMap", ["open", "close"])
@@ -77,7 +89,7 @@ format_map["underline"] = bbc_underline
 MESSAGE_TYPE_WARNING = 0
 MESSAGE_TYPE_ERROR = 1
 
-def add_constants_node(godot_root: et.Element)->et.Element:
+def add_constants_node(godot_root: et.Element) -> et.Element:
     """
     Get the constants element from the Godot output XML, if it doesn't exist it create one
     :param godot_root: The Godot root element of the output XML
@@ -104,7 +116,7 @@ def catalog_bindings(doxygen_data_node: et.Element, class_name: str) -> bool:
     # clear_tracked_bindings()
     code_file_name = get_implementation_file_name(doxygen_data_node)
     if code_file_name is None:
-        print_message("Unable to determine code implementation file for " + class_name,MESSAGE_TYPE_WARNING)
+        print_message("Unable to determine code implementation file for " + class_name, MESSAGE_TYPE_WARNING)
         return False
     else:
         project_src = src_folder
@@ -113,7 +125,7 @@ def catalog_bindings(doxygen_data_node: et.Element, class_name: str) -> bool:
             load_godot_bindings(code_file, class_name)
             return True
         else:
-            print_message("Code Implementation File not found " + code_file_name,MESSAGE_TYPE_ERROR)
+            print_message("Code Implementation File not found " + code_file_name, MESSAGE_TYPE_ERROR)
             return False
 
 
@@ -169,7 +181,33 @@ def create_bound_methods(bind_methods_code: str) -> None:
                 bound_methods_set.add(qualified_name)
 
 
-def create_enumator_data(godot_root: et.Element, reference: str)->None:
+def create_bound_signals(bind_methods_code: str) -> None:
+    bound_signal_pattern = r'ADD_SIGNAL\((.*?)\)\);'
+    bound_signal_data = re.findall(bound_signal_pattern, bind_methods_code)
+
+    for bound_signal in bound_signal_data:
+        bound_signal_values = dict()
+        name_pattern = r'MethodInfo\(\"(.*?)\"'
+        signal_name = re.findall(name_pattern, bound_signal)[0]
+        propert_info_pattern = r'PropertyInfo\((.*?)\)'
+        propert_info = re.findall(propert_info_pattern, bound_signal)
+        parameter_index = 0
+        bound_signal_values['name'] = signal_name
+        bound_signal_values['parameters'] = []
+        for propert_info in propert_info:
+            values = propert_info.split(",")
+            value_type = values[0].split("::")[1]
+            parameter_name = values[1].replace('"', "")
+            parameter_value =dict()
+            parameter_value['type'] = value_type
+            parameter_value['index'] = parameter_index
+            parameter_value['name'] = parameter_name
+            bound_signal_values['parameters'].append(parameter_value)
+            parameter_index += 1
+        bound_signals[signal_name] = bound_signal_values
+
+
+def create_enumator_data(godot_root: et.Element, reference: str) -> None:
     """
     Loads the reference file for the Doxygen class XML that is being parsed, if found, then
     the reference file and the Godot XML root element are passed to the enumerator constants preprocessor.
@@ -203,6 +241,7 @@ def create_godot_doc(file: Path) -> None:
         create_method_data(godot_root, data_node)
         create_member_data(godot_root, data_node)
         create_enumator_data(godot_root, class_info.reference)
+        create_signal_data(godot_root,data_node)
         write_file(godot_root, class_info.class_name)
 
 
@@ -235,6 +274,60 @@ def create_method_data(godot_root: et.Element, data_node: et.Element) -> None:
     # todo: add handling of protected functions
 
 
+def set_signal_data(godot_root:et.Element,signal_data: dict()):
+    if len(bound_signals) < 1:
+        return
+    signals_node = et.SubElement(godot_root, "signals")
+    for signal in bound_signals:
+        signal_node = et.SubElement(signals_node, "signal")
+        signal_node.set("name", signal)
+        parameters = bound_signals[signal]['parameters']
+        if len(parameters) > 0:
+            for each_parameter in parameters:
+                parameter_node = et.SubElement(signal_node, "parameter")
+                parameter_node.set("index", str(each_parameter['index']))
+                parameter_node.set("name", each_parameter['name'])
+                parameter_node.set("type", each_parameter['type'])
+        if signal in signal_data:
+            description_node = et.SubElement(signal_node, "description")
+            description = signal_data[signal]['description']
+            if 'note' in signal_data[signal]:
+                description = description + '[br][br][b]Note:[/b]' + ' ' + signal_data[signal]['note']
+            if 'warning' in signal_data[signal]:
+                description = description + '[br][br][b]Warning:[/b]' + ' ' + signal_data[signal]['warning']
+            description_node.text = description
+
+
+def create_signal_data(godot_root: et.Element,data_node: et.Element) -> None:
+    reference_nodes = data_node.findall(".//xrefsect/..")
+    signal_data = dict()
+    for reference_node in reference_nodes:
+        godot_only_node = reference_node.find(".//godotonly")
+        if godot_only_node is not None:
+            if godot_only_node.get("kind") == 'signal':
+                signal_name = godot_only_node.get("name")
+                signal_name_actual = re.sub(r"\(.*?\)", "", signal_name)
+                content_nodes = reference_node.findall('.//para')
+                text_node = et.Element('description')
+                text_node.text = content_nodes[2].text
+                for child in content_nodes[2]:
+                    text_node.append(copy.deepcopy(child))
+                description = parse_xml_text(text_node)
+                signal_values = dict()
+                signal_values['name'] = signal_name_actual
+                signal_values['description'] = description
+                headlines = reference_node.findall('.//simplesect')
+                if len(headlines) > 0:
+                    for headline in headlines:
+                        if headline.get("kind")== 'note':
+                            signal_values['note'] = parse_xml_text(headline[0])
+                        elif headline.get("kind") == 'warning':
+                            signal_values['warning'] = parse_xml_text(headline[0])
+                            
+                signal_data[signal_name_actual] = signal_values
+
+    set_signal_data(godot_root,signal_data)
+        
 def get_class_name(data_node: et.Element) -> lz.ClassInfo:
     # todo: update docstring for new method signature
     """
@@ -244,7 +337,7 @@ def get_class_name(data_node: et.Element) -> lz.ClassInfo:
     """
     class_name = data_node.attrib['id']
     name = class_name.replace("class", "")
-    reference_node  = data_node.find('includes')
+    reference_node = data_node.find('includes')
     reference = reference_node.attrib['refid']
     return lz.ClassInfo(name, reference)
 
@@ -292,11 +385,15 @@ def get_tag_text(doxygen_node: et.Element) -> str:
         parts.append(doxygen_node.text.strip())
 
     for mixed_element_node in doxygen_node:
+        empty_element = True
         element_text = parse_xml_text(mixed_element_node)
-        parts.append(element_text)
-        if mixed_element_node.tag == 'para':
-            parts.append(bbc_linebreak.open)
-            parts.append(bbc_linebreak.open)
+        if element_text:
+            parts.append(element_text)
+            empty_element = False
+        if not empty_element and mixed_element_node.tag == 'para':
+            if parts[-1] != bbc_linebreak.open:
+                parts.append(bbc_linebreak.open)
+                parts.append(bbc_linebreak.open)
 
     text = " ".join(parts)
 
@@ -324,7 +421,7 @@ def load_godot_bindings(src_file: Path, class_name: str) -> None:
         bind_method_content = bind_methods_match.group(0)
         map_godot_bindings(bind_method_content)
     else:
-        print_message("_bind_methods function not found in " + src_file,MESSAGE_TYPE_WARNING)
+        print_message("_bind_methods function not found in " + src_file, MESSAGE_TYPE_WARNING)
 
 
 def map_godot_bindings(bind_method_code: str) -> None:
@@ -341,6 +438,7 @@ def map_godot_bindings(bind_method_code: str) -> None:
         map_property_bindings(bound_methods_match.group(1))
         create_bound_methods(bound_methods_match.group(1))
         create_bound_enums(bound_methods_match.group(1))
+        create_bound_signals(bound_methods_match.group(1))
     else:
         print_message("Unknown error could not get content of _bind_methods function", MESSAGE_TYPE_ERROR)
 
@@ -379,7 +477,12 @@ def parse_xml_text(doxygen_node: et.Element) -> str:
     if doxygen_node.tag in element_black_list_set:
         return ""
 
-    if not doxygen_node.text is None:
+    if doxygen_node.tag == 'para':
+        if len(doxygen_node) > 0:
+            if doxygen_node[0].tag == 'xrefsect':
+                return ""
+
+    if doxygen_node.text is not None:
         parts.append(doxygen_node.text.strip())
 
     for mixed_element_node in doxygen_node:
@@ -394,11 +497,21 @@ def parse_xml_text(doxygen_node: et.Element) -> str:
                 child_content = parse_xml_text(mixed_element_node)
                 parts[-1] = parts[-1] + child_content.strip()
             parts[-1] = parts[-1] + markup.close
-        elif mixed_element_node.tag == "godotonly":
-            if mixed_element_node.get('position') == "close":
-                parts[-1] = parts[-1] + mixed_element_node.get("content") + mixed_element_node.tail.rstrip()
+        elif mixed_element_node.tag == "godotonly" and mixed_element_node.get("kind") == 'text':
+
+            if mixed_element_node.tail is not None:
+                node_tail = mixed_element_node.tail.rstrip()
             else:
-                parts.append(mixed_element_node.get("content") + mixed_element_node.tail.strip())
+                node_tail = ""
+            if mixed_element_node.get("content") is not None:
+                content = mixed_element_node.get("content")
+            else:
+                content = ""
+
+            if mixed_element_node.get('position') == "close":
+                parts[-1] = parts[-1] + content + node_tail
+            else:
+                parts.append(content + node_tail)
 
         if not mixed_element_node.tail is None and not mixed_element_node.tail == " ":
             if not mixed_element_node.tag == "godotonly":
@@ -408,7 +521,7 @@ def parse_xml_text(doxygen_node: et.Element) -> str:
     return text
 
 
-def preprocess_enumerator_constants(godot_root: et.Element, xml_reference_file: Path)->None:
+def preprocess_enumerator_constants(godot_root: et.Element, xml_reference_file: Path) -> None:
     """
     Finds the enumerator section in the reference file, once found it loops through each enumerator
     checking to see if the enumerator is bound, if so it calls set_enumerator_data which will add the
@@ -427,7 +540,7 @@ def preprocess_enumerator_constants(godot_root: et.Element, xml_reference_file: 
             set_enumerator_data(godot_root, enumerator_node, value_name)
 
 
-def print_message(message:str,message_type: int)->None:
+def print_message(message: str, message_type: int) -> None:
     """
     Prints output messages, if methods.py from the cpp template is found it uses the color printing from that
     module.
@@ -497,7 +610,7 @@ def set_detailed_description_as_text(godot_node: et.Element, data_node: et.Eleme
     godot_node.text = text
 
 
-def set_enumerator_data(godot_root: et.Element, enumerator_node: et.Element, enumerator_name:str)->None:
+def set_enumerator_data(godot_root: et.Element, enumerator_node: et.Element, enumerator_name: str) -> None:
     """
     Loops through the elements in the Doxygen enumerator element to find the enumerator values.  For each enumerator value it
     checks if it is bound, if it is it is output to the constants node of the Godot output XML
@@ -527,7 +640,6 @@ def set_enumerator_data(godot_root: et.Element, enumerator_node: et.Element, enu
                 output_node.set("value", str(index_value))
                 set_detailed_description_as_text(output_node, enumerator_value_node)
                 index_value += 1
-
 
 
 def set_member_data(godot_members_node: et.Element, doxygen_node: et.Element) -> None:
@@ -615,13 +727,13 @@ def write_file(godot_root: et.Element, class_name: str) -> bool:
         result = True
     except(OSError, IOError) as e:
         # Catches issues like permission denied or invalid paths
-        print_message(f"File system error: {e}",MESSAGE_TYPE_ERROR)
+        print_message(f"File system error: {e}", MESSAGE_TYPE_ERROR)
     except Exception as e:
         # Catches other potential issues (e.g., non-serializable data)
-        print_message(f"An unexpected error occurred: {e}",MESSAGE_TYPE_ERROR)
+        print_message(f"An unexpected error occurred: {e}", MESSAGE_TYPE_ERROR)
 
     return result
 
 
-parse_class_xml_files()
-print("Destination: " + dest_folder)
+if __name__ == '__main__':
+    parse_class_xml_files()

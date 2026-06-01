@@ -2,13 +2,19 @@
 # -*- coding: utf-8 -*-
 
 """
-@Project: doxy-to-godot
-@Date: 5/25/26
-@File: doxy_build_profile
+@Project: poozos_albatross
+@Date: 5/27/26
+@File: waft_gogo
 
-@Author: Silenuz Nowan (silenuznowan@Yahoo.com)
+@Author: Silenuz Nowan (silenuznowan@yahoo.com)
 
-python script to create a build_profile.json file from doxygen XML output
+This module parses Doxygen generated XML documentation and attempts to generate
+GDExtension build_profile.json file.
+
+Gogo: "You're sure it was this evening?"
+Didi: "What?"
+Gogo: "That we were to wait."
+Didi: "He said Saturday. (Pause) I think."
 """
 import sys
 import json
@@ -20,7 +26,7 @@ import luckys_zephyr as lz
 
 xml_input_folder = sys.argv[1]
 dest_folder = sys.argv[2]
-src_folder = Path(dest_folder).parent
+src_folder = Path(dest_folder)
 
 build_profile = dict()
 build_profile['_'] = 'Build Profile Generated from Doxygen XML'
@@ -48,7 +54,7 @@ def parse_reference_file(reference):
         print("file not found " + file_name)
 
 
-def create_profile_for_class(file):
+def create_profile_for_class(file: Path):
     class_data = lz.create_profile_for_class(file)
     class_info = class_data[1]
     parse_reference_file(class_info.reference)
@@ -69,4 +75,5 @@ def parse_class_xml_files() -> None:
         create_profile_for_class(file)
         write_output()
 
-parse_class_xml_files()
+if __name__ == '__main__':
+    parse_class_xml_files()
