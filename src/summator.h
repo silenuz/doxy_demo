@@ -52,6 +52,18 @@ using namespace godot;
  * @signal{doesnt_exist|This is just a plain description, no warning or note for parser testing.  This signal
  * doesn't actually exist, so don't try to use it.  This should only output to html as the signal is not actually registered
  * with ClassDB.}
+ *
+ * Check Status Example:
+ *	\code{.gdscript}
+ * if total >= sum.SUM_GOOD:
+ *	print("Life is good")
+ * elif total >= sum.SUM_OKAY:
+ *	print("Could be doing better")
+ * elif total >= sum.SUM_REQUIRED:
+ *	print("At least you making rent")
+ * else:
+ *	print("Your broke")
+ * \endcode
  */
 class Summator : public Object
 {
@@ -68,6 +80,13 @@ protected:
 	static void _bind_methods();
 
 public:
+
+	static constexpr int MINMUM_REQUIRED_AMOUNT = 50; /**<The minimum total that is required to meet expenses */
+	/** Meeting expenses with a little extra */
+	static const int DOING_OKAY_AMOUNT = 100;
+	/** Things are going good, well into the black */
+	static const int DOING_NOTHING_AMOUNT = 200;
+
 	/**
 	 * @brief adds the passed value to the current total
 	 *
