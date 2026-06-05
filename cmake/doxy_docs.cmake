@@ -62,7 +62,7 @@ if(DOXYGEN_FOUND)
             "gdthe{2}=\"\\xmlonly${GODOT_LINK_START}theme_item \\1.\\\"/>\\endxmlonly\\2\\xmlonly${GODOT_LINK_CLOSE}\\endxmlonly\""
             "gdpar{1}=\"\\xmlonly${GODOT_LINK_START}param\\\"/>\\endxmlonly\\1\\xmlonly${GODOT_LINK_CLOSE}\\endxmlonly\""
             # signal alias uses | pipes as a parameter seperator so that commas don't have to be escaped
-            "signal{2|}=\"\\xrefitem signal \\\"Signal\\\" \\\"Signals\\\"${GODOT_SIGNAL_OPEN}@parblock<b>\\1:</b> ^^^^^^ \\2@endparblock${GODOT_SIGNAL_CLOSE}\""
+            "signal{2|}=\"\\xrefitem signal \\\"Signal\\\" \\\"Signals\\\"${GODOT_SIGNAL_OPEN}@parblock<b>\\1:</b> ^^^^^^ \\2@endparblock^^\""
 
     )
 
