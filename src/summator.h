@@ -54,15 +54,15 @@ using namespace godot;
  * with ClassDB.}
  *
  * Check Status Example:
- *	\code{.gdscript}
+*	\code{.gdscript}
  * if total >= sum.SUM_GOOD:
- *	print("Life is good")
+ *	   print("Life is good")
  * elif total >= sum.SUM_OKAY:
- *	print("Could be doing better")
+ *	   print("Could be doing better")
  * elif total >= sum.SUM_REQUIRED:
- *	print("At least you making rent")
+ *	   print("At least you making rent")
  * else:
- *	print("Your broke")
+ *	   print("Your broke")
  * \endcode
  */
 class Summator : public Object
