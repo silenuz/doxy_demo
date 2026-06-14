@@ -49,7 +49,8 @@ add_library(${LIBNAME} SHARED
         src/summator.h
         src/summator.cpp
         src/traffic_light.h
-        src/traffic_light.cpp)
+        src/traffic_light.cpp
+        src/traffic_light_bindings.cpp)
 
 target_sources(${LIBNAME}
         PRIVATE
