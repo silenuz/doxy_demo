@@ -9,17 +9,20 @@ The scripts will only be updated here once week
 
 If I broke something this is where it will be.  Currently, nothing to report.
 
-Current Status: ALPHA (if that)
--------------------------------
-Currently, the python script is capable of exporting the content for methods, properties, enum constants and signals.
+Current Status: ALPHA (Almost Beta)
+-----------------------------------
+Currently, the python script is capable of exporting the content for methods, properties, enum constants and signals, and integer constants.
 
-Processing of code blocks is in progress and should be finished soon along with constants. 
+Processing of code blocks almost works except for a small bug see [Poozos Albatross](https://github.com/silenuz/poozos_albatross)
 
 [Obligatory Screenshot](#obligatory-screenshot)
 
 The cmake build process now uses a build profile to speed compilation of the extension.
 
 The cmake build process now has an extra python script to generate a build_profile.json file from the Doxygen XML
+
+In some cases the source code parser may fail, or may encounter something it doesn't recognize yet like GDVirtual.  
+If this happens, instructions to merge missing elements can be found [here](git_content/merge_missing.md).
 
 Description:
 ------------
